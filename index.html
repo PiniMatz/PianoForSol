@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PianoForSol - לומדים לנגן ולקרוא תווים בפסנתר</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation Bar -->
+        <header class="app-header">
+            <div class="logo-area">
+                <span class="logo-icon">🎹</span>
+                <h1 class="logo-title">PianoForSol</h1>
+            </div>
+            
+            <nav class="app-nav">
+                <button class="nav-btn active" id="tab-home" onclick="switchTab('home')">🏠 ראשי</button>
+                <button class="nav-btn" id="tab-lessons" onclick="switchTab('lessons')">📚 שיעורים</button>
+                <button class="nav-btn" id="tab-practice" onclick="switchTab('practice')">⚡ תרגול מהיר</button>
+                <button class="nav-btn" id="tab-songs" onclick="switchTab('songs')">🎵 שירים</button>
+            </nav>
+
+            <div class="stats-area">
+                <div class="stat-badge" title="כוכבים שצברת">
+                    <span class="stat-icon">⭐</span>
+                    <span class="stat-value" id="header-stars">0</span>
+                </div>
+                <div class="stat-badge" title="רצף ימים של אימון">
+                    <span class="stat-icon">🔥</span>
+                    <span class="stat-value" id="header-streak">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- HOME SCREEN -->
+            <section class="content-panel active" id="panel-home">
+                <div class="welcome-card">
+                    <h2>שלום, מוזיקאי/ת צעיר/ה! 👋</h2>
+                    <p>ברוכים הבאים ל-PianoForSol. כאן נלמד לקרוא תווים ולנגן אותם על פסנתר אמיתי בעזרת המיקרופון של המכשיר שלך!</p>
+                    <div class="home-stats-summary">
+                        <div class="summary-box">
+                            <span class="summary-number" id="home-stars-total">0</span>
+                            <span class="summary-label">כוכבים שנצברו</span>
+                        </div>
+                        <div class="summary-box">
+                            <span class="summary-number" id="home-lessons-completed">0/5</span>
+                            <span class="summary-label">שיעורים שהושלמו</span>
+                        </div>
+                        <div class="summary-box">
+                            <span class="summary-number" id="home-streak-days">0</span>
+                            <span class="summary-label">ימי אימון ברצף</span>
+                        </div>
+                    </div>
+                    <button class="action-btn-large pulse" onclick="startNextLesson()">להמשך הלמידה 🚀</button>
+                </div>
+
+                <div class="quick-tips-card">
+                    <h3>איך מתחילים? 💡</h3>
+                    <ul>
+                        <li>📱 מניחים את הטאבלט/טלפון על סטנד התווים של הפסנתר האמיתי שלכם.</li>
+                        <li>🎤 מאשרים גישה למיקרופון כדי שהאפליקציה תוכל להאזין לצלילים שתנגנו.</li>
+                        <li>🎹 מנגנים בפסנתר האמיתי - האפליקציה תזהה מיד אם ניגנתם נכון!</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- LESSONS MAP SCREEN -->
+            <section class="content-panel" id="panel-lessons">
+                <div class="section-header">
+                    <h2>מפת השיעורים שלי 🗺️</h2>
+                    <p>השלימו את השיעורים שלב אחר שלב כדי ללמוד את שפת המוזיקה!</p>
+                </div>
+                <div class="lessons-path" id="lessons-path-container">
+                    <!-- Dynamic lesson nodes will be generated here -->
+                </div>
+            </section>
+
+            <!-- PRACTICE / NOTE QUEST SCREEN -->
+            <section class="content-panel" id="panel-practice">
+                <div class="welcome-card text-center">
+                    <h2>תרגול מהיר - אקדמיית התווים ⚡</h2>
+                    <p>כמה מהר תצליחו לזהות 10 תווים ברצף? בואו נבדוק!</p>
+                    <div class="practice-settings">
+                        <p class="practice-high-score">שיא אישי: <span id="practice-high-score-val">0</span> נקודות</p>
+                    </div>
+                    <button class="action-btn-large" onclick="startPracticeMode()">התחל אימון מהיר 🎮</button>
+                </div>
+            </section>
+
+            <!-- SONG STUDIO SCREEN -->
+            <section class="content-panel" id="panel-songs">
+                <div class="section-header">
+                    <h2>סטודיו השירים 🎵</h2>
+                    <p>בחרו שיר והתחילו לנגן אותו תו-אחר-תו בפסנתר שלכם!</p>
+                </div>
+                <div class="songs-grid" id="songs-list-container">
+                    <!-- Dynamic song cards will be generated here -->
+                </div>
+            </section>
+
+            <!-- ACTIVE PLAY AREA (Shared for Lessons, Note Quest, and Song Studio) -->
+            <section class="content-panel" id="panel-play-area">
+                <div class="play-area-header">
+                    <button class="back-btn" onclick="exitPlayArea()">➡️ חזרה</button>
+                    <h3 id="play-area-title">שיעור 1: התו דו</h3>
+                    <div class="play-stats">
+                        <span id="play-progress-label">התקדמות: 0%</span>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" id="play-progress-bar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Microphone Status Banner -->
+                <div class="mic-status-banner" id="mic-banner" onclick="initMicrophone()">
+                    <span class="mic-icon" id="mic-banner-icon">🎤</span>
+                    <span class="mic-text" id="mic-banner-text">המיקרופון כבוי. לחצו כאן כדי להפעיל זיהוי קולי לפסנתר האמיתי שלכם.</span>
+                </div>
+
+                <!-- Visual Staff Display -->
+                <div class="staff-container">
+                    <svg id="svg-staff" viewBox="0 0 800 240" preserveAspectRatio="xMidYMid meet">
+                        <!-- Treble clef, lines, and active notes will be drawn here dynamically by app.js -->
+                    </svg>
+                </div>
+
+                <!-- Dynamic Instruction / Feedback Box -->
+                <div class="instruction-box" id="instruction-box">
+                    <div class="instruction-text" id="instruction-text">טוען שיעור...</div>
+                    <div class="feedback-text" id="feedback-text"></div>
+                </div>
+
+                <!-- Visual Keyboard Alignment Guide -->
+                <div class="keyboard-helper">
+                    <span id="keyboard-helper-msg">ניתן גם ללחוץ על הקלידים על המסך לתרגול ללא פסנתר.</span>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Piano Virtual Keyboard (Sticky Bottom in Play Screen) -->
+        <footer class="app-footer" id="app-keyboard-footer">
+            <div class="piano-keyboard-container">
+                <div class="piano-keyboard" id="piano-keyboard">
+                    <!-- White keys -->
+                    <div class="piano-key white-key" data-note="C4" onclick="handleVirtualKeyPress('C4')"><span class="key-label">דו<br><span class="eng-note">C4</span></span></div>
+                    <div class="piano-key white-key" data-note="D4" onclick="handleVirtualKeyPress('D4')"><span class="key-label">רה<br><span class="eng-note">D4</span></span></div>
+                    <div class="piano-key white-key" data-note="E4" onclick="handleVirtualKeyPress('E4')"><span class="key-label">מי<br><span class="eng-note">E4</span></span></div>
+                    <div class="piano-key white-key" data-note="F4" onclick="handleVirtualKeyPress('F4')"><span class="key-label">פה<br><span class="eng-note">F4</span></span></div>
+                    <div class="piano-key white-key" data-note="G4" onclick="handleVirtualKeyPress('G4')"><span class="key-label">סול<br><span class="eng-note">G4</span></span></div>
+                    <div class="piano-key white-key" data-note="A4" onclick="handleVirtualKeyPress('A4')"><span class="key-label">לה<br><span class="eng-note">A4</span></span></div>
+                    <div class="piano-key white-key" data-note="B4" onclick="handleVirtualKeyPress('B4')"><span class="key-label">סי<br><span class="eng-note">B4</span></span></div>
+                    
+                    <div class="piano-key white-key" data-note="C5" onclick="handleVirtualKeyPress('C5')"><span class="key-label">דו<br><span class="eng-note">C5</span></span></div>
+                    <div class="piano-key white-key" data-note="D5" onclick="handleVirtualKeyPress('D5')"><span class="key-label">רה<br><span class="eng-note">D5</span></span></div>
+                    <div class="piano-key white-key" data-note="E5" onclick="handleVirtualKeyPress('E5')"><span class="key-label">מי<br><span class="eng-note">E5</span></span></div>
+                    <div class="piano-key white-key" data-note="F5" onclick="handleVirtualKeyPress('F5')"><span class="key-label">פה<br><span class="eng-note">F5</span></span></div>
+                    <div class="piano-key white-key" data-note="G5" onclick="handleVirtualKeyPress('G5')"><span class="key-label">סול<br><span class="eng-note">G5</span></span></div>
+                    <div class="piano-key white-key" data-note="A5" onclick="handleVirtualKeyPress('A5')"><span class="key-label">לה<br><span class="eng-note">A5</span></span></div>
+                    <div class="piano-key white-key" data-note="B5" onclick="handleVirtualKeyPress('B5')"><span class="key-label">סי<br><span class="eng-note">B5</span></span></div>
+                    
+                    <div class="piano-key white-key" data-note="C6" onclick="handleVirtualKeyPress('C6')"><span class="key-label">דו<br><span class="eng-note">C6</span></span></div>
+
+                    <!-- Black keys overlays (positioned absolute via CSS) -->
+                    <div class="piano-key black-key" data-note="C#4" style="right: 5.2%;" onclick="handleVirtualKeyPress('C#4')"><span class="key-label">דו#</span></div>
+                    <div class="piano-key black-key" data-note="D#4" style="right: 12.3%;" onclick="handleVirtualKeyPress('D#4')"><span class="key-label">רה#</span></div>
+                    
+                    <div class="piano-key black-key" data-note="F#4" style="right: 26.5%;" onclick="handleVirtualKeyPress('F#4')"><span class="key-label">פה#</span></div>
+                    <div class="piano-key black-key" data-note="G#4" style="right: 33.6%;" onclick="handleVirtualKeyPress('G#4')"><span class="key-label">סול#</span></div>
+                    <div class="piano-key black-key" data-note="A#4" style="right: 40.7%;" onclick="handleVirtualKeyPress('A#4')"><span class="key-label">לה#</span></div>
+                    
+                    <div class="piano-key black-key" data-note="C#5" style="right: 55.0%;" onclick="handleVirtualKeyPress('C#5')"><span class="key-label">דו#</span></div>
+                    <div class="piano-key black-key" data-note="D#5" style="right: 62.1%;" onclick="handleVirtualKeyPress('D#5')"><span class="key-label">רה#</span></div>
+                    
+                    <div class="piano-key black-key" data-note="F#5" style="right: 76.3%;" onclick="handleVirtualKeyPress('F#5')"><span class="key-label">פה#</span></div>
+                    <div class="piano-key black-key" data-note="G#5" style="right: 83.4%;" onclick="handleVirtualKeyPress('G#5')"><span class="key-label">סול#</span></div>
+                    <div class="piano-key black-key" data-note="A#5" style="right: 90.5%;" onclick="handleVirtualKeyPress('A#5')"><span class="key-label">לה#</span></div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Core App logic -->
+    <script src="app.js"></script>
+</body>
+</html>
