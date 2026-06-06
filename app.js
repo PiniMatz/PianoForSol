@@ -372,7 +372,7 @@ function switchTab(tabId) {
     if (activePanel) activePanel.classList.add('active');
 
     // Hide keyboard footer unless in the active play area
-    document.getElementById('app-keyboard-footer').style.display = 'none';
+    setKeyboardVisibility(false);
 
     // Toggle Reset Button Visibility (hide during play sessions to avoid distraction)
     const resetBtn = document.getElementById('reset-btn');
@@ -609,6 +609,7 @@ function drawStaff(highlightNoteName = null, svgElement = null, showNameLabel = 
     clef.setAttribute('d', 'M 60,175 C 55,170 50,160 52,152 C 55,140 70,135 72,150 C 73,158 65,168 57,166 C 53,165 48,155 52,143 C 58,125 78,110 78,85 C 78,60 67,40 60,15 L 57,15 C 55,45 61,70 52,95 C 44,115 30,130 30,150 C 30,178 52,195 72,192 C 85,190 92,175 92,160 C 92,130 68,115 62,90 L 67,45 C 70,40 73,42 71,50 C 62,100 85,120 85,150 C 85,170 75,180 60,175 Z');
     clef.setAttribute('fill', 'var(--neon-cyan)');
     clef.setAttribute('filter', 'drop-shadow(0 0 6px rgba(0, 242, 254, 0.5))');
+    clef.setAttribute('transform', 'translate(0, -12)');
     svg.appendChild(clef);
 
     // If there's a target note to display, draw it
@@ -717,7 +718,7 @@ function loadLesson(lessonId) {
 
     switchTab('play-area');
     document.getElementById('play-area-title').textContent = lesson.title;
-    document.getElementById('app-keyboard-footer').style.display = 'block';
+    setKeyboardVisibility(true);
 
     runLessonStep();
 }
@@ -822,7 +823,7 @@ function loadSong(songId) {
 
     switchTab('play-area');
     document.getElementById('play-area-title').textContent = song.title;
-    document.getElementById('app-keyboard-footer').style.display = 'block';
+    setKeyboardVisibility(true);
 
     runSongStep();
 }
@@ -1355,14 +1356,15 @@ function confirmResetProgress() {
 let currentQuizOptions = [];
 
 function setupInputMode(mode) {
-    const keyboardFooter = document.getElementById('app-keyboard-footer');
     const optionsContainer = document.getElementById('play-options-container');
     const micBanner = document.getElementById('mic-banner');
     const playSeriesContainer = document.getElementById('play-series-container');
+    const keyboardHelper = document.querySelector('.keyboard-helper');
     
     if (mode === 'quiz') {
         // Hide keyboard & mic banner
-        keyboardFooter.style.display = 'none';
+        setKeyboardVisibility(false);
+        if (keyboardHelper) keyboardHelper.style.display = 'none';
         micBanner.style.display = 'none';
         if (playSeriesContainer) playSeriesContainer.style.display = 'none';
         // Show options buttons
@@ -1371,7 +1373,8 @@ function setupInputMode(mode) {
         stopPitchDetection();
     } else if (mode === 'series') {
         // Hide keyboard, mic banner, and quiz options
-        keyboardFooter.style.display = 'none';
+        setKeyboardVisibility(false);
+        if (keyboardHelper) keyboardHelper.style.display = 'none';
         micBanner.style.display = 'none';
         optionsContainer.style.display = 'none';
         // Show series container
@@ -1379,7 +1382,8 @@ function setupInputMode(mode) {
         stopPitchDetection();
     } else if (mode === 'names-lesson') {
         // Hide keyboard, mic banner, quiz options, and series container
-        keyboardFooter.style.display = 'none';
+        setKeyboardVisibility(false);
+        if (keyboardHelper) keyboardHelper.style.display = 'none';
         micBanner.style.display = 'none';
         optionsContainer.style.display = 'none';
         if (playSeriesContainer) playSeriesContainer.style.display = 'none';
@@ -1387,8 +1391,12 @@ function setupInputMode(mode) {
     } else {
         // Show keyboard & mic banner
         if (state.currentTab === 'play-area') {
-            keyboardFooter.style.display = 'block';
+            setKeyboardVisibility(true);
+            if (keyboardHelper) keyboardHelper.style.display = 'block';
             micBanner.style.display = 'flex';
+        } else {
+            setKeyboardVisibility(false);
+            if (keyboardHelper) keyboardHelper.style.display = 'none';
         }
         // Hide options buttons and series container
         optionsContainer.style.display = 'none';
@@ -1678,6 +1686,7 @@ function drawSeriesStaff(notesList, activeIndex = -1, evaluationResults = null) 
     clef.setAttribute('d', 'M 60,175 C 55,170 50,160 52,152 C 55,140 70,135 72,150 C 73,158 65,168 57,166 C 53,165 48,155 52,143 C 58,125 78,110 78,85 C 78,60 67,40 60,15 L 57,15 C 55,45 61,70 52,95 C 44,115 30,130 30,150 C 30,178 52,195 72,192 C 85,190 92,175 92,160 C 92,130 68,115 62,90 L 67,45 C 70,40 73,42 71,50 C 62,100 85,120 85,150 C 85,170 75,180 60,175 Z');
     clef.setAttribute('fill', 'var(--neon-cyan)');
     clef.setAttribute('filter', 'drop-shadow(0 0 6px rgba(0, 242, 254, 0.5))');
+    clef.setAttribute('transform', 'translate(0, -12)');
     svg.appendChild(clef);
 
     // Calculate X coordinates
@@ -1992,4 +2001,19 @@ function checkSeriesAnswers() {
     actionContainer.appendChild(backBtn);
 
     feedbackBox.appendChild(actionContainer);
+}
+
+function setKeyboardVisibility(visible) {
+    const footer = document.getElementById('app-keyboard-footer');
+    const container = document.querySelector('.app-container');
+    if (footer) {
+        footer.style.display = visible ? 'block' : 'none';
+    }
+    if (container) {
+        if (visible) {
+            container.classList.remove('keyboard-hidden');
+        } else {
+            container.classList.add('keyboard-hidden');
+        }
+    }
 }

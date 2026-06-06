@@ -1343,3 +1343,8 @@ body {
         font-size: 0.55rem;
     }
 }
+
+/* Keyboard Hidden State App Padding */
+.app-container.keyboard-hidden {
+    padding-bottom: 2rem !important;
+}
