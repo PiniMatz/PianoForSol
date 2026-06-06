@@ -348,6 +348,12 @@ function playFailBuzzer() {
 function switchTab(tabId) {
     state.currentTab = tabId;
     
+    // Hide main navigation header during active play sessions to maximize vertical screen space
+    const mainHeader = document.querySelector('.app-header');
+    if (mainHeader) {
+        mainHeader.style.display = tabId === 'play-area' ? 'none' : 'flex';
+    }
+    
     // Update active class on nav buttons
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active');

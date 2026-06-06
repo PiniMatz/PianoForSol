@@ -764,20 +764,155 @@ body {
 
 /* Responsive details for piano scroll on mobile */
 @media (max-width: 768px) {
-    .app-header {
-        flex-direction: column;
-        gap: 1rem;
-        padding: 1rem;
+    .app-container {
+        padding-bottom: 160px; /* Reduced space for smaller mobile keyboard */
     }
+
+    .app-header {
+        flex-direction: row !important; /* Keep as row on mobile */
+        justify-content: space-between;
+        padding: 0.5rem 0.75rem;
+        gap: 0.4rem;
+    }
+    
+    .logo-title {
+        display: none; /* Hide logo text to save horizontal space */
+    }
+
+    .logo-icon {
+        font-size: 1.4rem;
+    }
+
+    .app-nav {
+        gap: 0.2rem;
+        padding: 0.2rem;
+    }
+
+    .nav-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .stats-area {
+        gap: 0.4rem;
+    }
+
+    .stat-badge {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.8rem;
+        border-radius: 12px;
+    }
+
+    .main-content {
+        margin: 1rem auto;
+        padding: 0 1rem;
+    }
+
+    .welcome-card {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+
+    .home-stats-summary {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .summary-box {
+        padding: 0.8rem;
+    }
+
+    .summary-number {
+        font-size: 1.8rem;
+    }
+
+    /* Reduce vertical heights in play area for mobile screens */
+    .play-area-header {
+        margin-bottom: 0.6rem;
+    }
+
+    #play-area-title {
+        font-size: 1.1rem;
+    }
+
+    .mic-status-banner {
+        padding: 0.5rem 0.8rem;
+        margin-bottom: 0.6rem;
+        border-radius: 12px;
+    }
+
+    .mic-text {
+        font-size: 0.8rem;
+    }
+
+    .staff-container {
+        padding: 0.6rem;
+        margin-bottom: 0.6rem;
+        border-radius: 12px;
+    }
+
+    #svg-staff {
+        max-height: 130px;
+    }
+
+    .instruction-box {
+        padding: 0.7rem 0.9rem;
+        margin-bottom: 0.6rem;
+        min-height: 75px;
+        border-radius: 12px;
+    }
+
+    .instruction-text {
+        font-size: 1.05rem;
+    }
+
+    .feedback-text {
+        font-size: 0.95rem;
+        height: 1.1rem;
+    }
+
+    /* Compact keyboard for mobile */
+    .app-footer {
+        padding: 0.6rem 0.4rem;
+    }
+
     .piano-keyboard-container {
         overflow-x: auto;
     }
+
     .piano-keyboard {
-        min-width: 750px;
+        min-width: 680px;
+        height: 120px; /* Shorter keys on mobile */
     }
-    .home-stats-summary {
-        grid-template-columns: 1fr;
-        gap: 1rem;
+
+    .white-key {
+        padding-bottom: 0.4rem;
+        border-radius: 0 0 4px 4px;
+    }
+
+    .key-label {
+        font-size: 0.65rem;
+    }
+
+    .eng-note {
+        font-size: 0.5rem;
+    }
+
+    .black-key {
+        height: 75px; /* Shorter black keys */
+        border-radius: 0 0 3px 3px;
+    }
+
+    .black-key .key-label {
+        font-size: 0.5rem;
+    }
+
+    .reset-progress-btn {
+        bottom: 10px;
+        left: 10px;
+        padding: 0.4rem 0.7rem;
+        font-size: 0.75rem;
     }
 }
 
