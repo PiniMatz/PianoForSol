@@ -367,6 +367,12 @@ function switchTab(tabId) {
     // Hide keyboard footer unless in the active play area
     document.getElementById('app-keyboard-footer').style.display = 'none';
 
+    // Toggle Reset Button Visibility (hide during play sessions to avoid distraction)
+    const resetBtn = document.getElementById('reset-btn');
+    if (resetBtn) {
+        resetBtn.style.display = tabId === 'play-area' ? 'none' : 'block';
+    }
+
     // Stop active pitch detection intervals if leaving play area
     if (tabId !== 'play-area') {
         stopPitchDetection();
@@ -1232,3 +1238,36 @@ window.addEventListener('DOMContentLoaded', () => {
     // Register clicks inside panels if needed
     document.getElementById('practice-high-score-val').textContent = state.practiceHighScore;
 });
+
+// --- Reset Progress Function ---
+function confirmResetProgress() {
+    const confirmation = confirm("סול, האם את בטוחה שברצונך למחוק את כל ההתקדמות שלך ולהתחיל מהתחלה? כל הכוכבים והשיאים יימחקו!");
+    if (confirmation) {
+        // Clear state
+        state.stars = 0;
+        state.streak = 0;
+        state.lastPlayedDate = null;
+        state.completedLessons = [];
+        state.practiceHighScore = 0;
+        
+        // Save empty state to localStorage
+        saveToLocalStorage();
+        
+        // Clear song scores specifically
+        SONGS_DB.forEach(song => {
+            localStorage.removeItem(`song_score_${song.id}`);
+        });
+        
+        // Refresh display
+        updateHeaderStats();
+        renderHomeScreen();
+        renderLessonsScreen();
+        renderSongsScreen();
+        
+        // Reset element text
+        const highScoreVal = document.getElementById('practice-high-score-val');
+        if (highScoreVal) highScoreVal.textContent = '0';
+        
+        alert("ההתקדמות אופסה בהצלחה! בהצלחה מהתחלה! 🚀");
+    }
+}

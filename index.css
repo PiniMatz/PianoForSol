@@ -779,3 +779,29 @@ body {
         gap: 1rem;
     }
 }
+
+/* Reset Progress Floating Button */
+.reset-progress-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(255, 56, 56, 0.15);
+    border: 1px solid rgba(255, 56, 56, 0.35);
+    color: var(--text-muted);
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 50;
+    backdrop-filter: blur(5px);
+    transition: all 0.25s ease;
+}
+
+.reset-progress-btn:hover {
+    background: var(--neon-red);
+    color: #fff;
+    border-color: var(--neon-red);
+    box-shadow: 0 0 12px rgba(255, 56, 56, 0.5);
+    transform: translateY(-2px);
+}
