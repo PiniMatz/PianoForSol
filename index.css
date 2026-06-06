@@ -1192,6 +1192,7 @@ body {
     gap: 1rem;
     width: 100%;
     margin-bottom: 1rem;
+    direction: ltr; /* Force left-to-right to match staff note order */
 }
 
 .series-slot {
