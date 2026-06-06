@@ -11,6 +11,7 @@ const state = {
     completedLessons: [], // list of lesson IDs completed
     activeSession: null,  // { type: 'lesson'|'practice'|'song', id: string, stepIndex: number, currentNote: string }
     practiceHighScore: 0,
+    practiceHighScoreQuiz: 0, // שיא אישי בשאלון אמריקאי
     
     // Audio / Microphone State
     micActive: false,
@@ -234,6 +235,132 @@ const LESSONS_DB = [
                 isCompletedStep: true
             }
         ]
+    },
+    {
+        id: 'lesson-6',
+        title: 'שיעור שמות 1: דו, רה, מי (שאלון אמריקאי)',
+        description: 'נלמד לקשר בין צורת התו לשמו בעברית',
+        steps: [
+            {
+                text: 'בואי נלמד את שמות התווים בשאלון אמריקאי! התו הראשון על קו עזר מתחת לחמישה הוא <strong>דו</strong> (C4). בחרי בכפתור <strong>דו</strong>.',
+                targetNote: 'C4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'התו הבא יושב ממש מתחת לקו הראשון. זהו התו <strong>רה</strong> (D4). בחרי בכפתור <strong>רה</strong>.',
+                targetNote: 'D4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'התו הבא מונח על הקו הראשון. זהו התו <strong>מי</strong> (E4). בחרי בכפתור <strong>מי</strong>.',
+                targetNote: 'E4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'עכשיו תורך לזהות לבד! מהו התו המופיע על החמישה?',
+                targetNote: 'C4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'מהו התו המופיע על החמישה?',
+                targetNote: 'E4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'מהו התו המופיע על החמישה?',
+                targetNote: 'D4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'מצוין! השלמת את לימוד שלושת התווים הראשונים!',
+                targetNote: null,
+                isCompletedStep: true
+            }
+        ]
+    },
+    {
+        id: 'lesson-7',
+        title: 'שיעור שמות 2: פה, סול, לה (שאלון אמריקאי)',
+        description: 'נלמד את התווים הבאים בחמישה',
+        steps: [
+            {
+                text: 'נמשיך לתווים הבאים. התו במרווח הראשון הוא <strong>פה</strong> (F4). בחרי בכפתור <strong>פה</strong>.',
+                targetNote: 'F4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'התו שעל הקו השני הוא <strong>סול</strong> (G4). בחרי בכפתור <strong>סול</strong>.',
+                targetNote: 'G4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'התו שבמרווח השני הוא <strong>לה</strong> (A4). בחרי בכפתור <strong>לה</strong>.',
+                targetNote: 'A4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'נסי לזהות לבד: מהו התו המוצג?',
+                targetNote: 'G4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'ומהו התו הזה?',
+                targetNote: 'F4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'ומהו התו הזה?',
+                targetNote: 'A4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'עבודה נהדרת! זיהית את פה, סול ולה בהצלחה!',
+                targetNote: null,
+                isCompletedStep: true
+            }
+        ]
+    },
+    {
+        id: 'lesson-8',
+        title: 'שיעור שמות 3: סי ודו גבוה (שאלון אמריקאי)',
+        description: 'זיהוי התווים הבאים בסולם',
+        steps: [
+            {
+                text: 'נסיים את הסולם הבסיסי! התו שעל הקו השלישי (האמצעי) הוא <strong>סי</strong> (B4). בחרי בכפתור <strong>סי</strong>.',
+                targetNote: 'B4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'התו שבמרווח השלישי הוא <strong>דו גבוה</strong> (C5). בחרי בכפתור <strong>דו</strong>.',
+                targetNote: 'C5',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'תרגול מהיר: מהו התו המצויר?',
+                targetNote: 'C5',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'מהו התו המצויר?',
+                targetNote: 'B4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'מהו התו המצויר?',
+                targetNote: 'G4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'מהו התו המצויר?',
+                targetNote: 'C4',
+                inputMode: 'quiz'
+            },
+            {
+                text: 'מדהים! סיימת את כל שיעורי שמות התווים! את מוכנה לאתגר התרגול המהיר.',
+                targetNote: null,
+                isCompletedStep: true
+            }
+        ]
     }
 ];
 
@@ -401,7 +528,8 @@ function saveToLocalStorage() {
         streak: state.streak,
         lastPlayedDate: state.lastPlayedDate,
         completedLessons: state.completedLessons,
-        practiceHighScore: state.practiceHighScore
+        practiceHighScore: state.practiceHighScore,
+        practiceHighScoreQuiz: state.practiceHighScoreQuiz
     };
     localStorage.setItem('piano_for_sol_data', JSON.stringify(dataToSave));
 }
@@ -416,6 +544,7 @@ function loadFromLocalStorage() {
             state.lastPlayedDate = data.lastPlayedDate;
             state.completedLessons = data.completedLessons || [];
             state.practiceHighScore = data.practiceHighScore || 0;
+            state.practiceHighScoreQuiz = data.practiceHighScoreQuiz || 0;
             
             // Check streak logic
             checkStreakValidity();
@@ -702,14 +831,12 @@ function runLessonStep() {
     feedbackBox.textContent = '';
     feedbackBox.className = 'feedback-text';
 
-    // Highlight active virtual keys helper
-    highlightPianoKeysHelper(step.highlightKeys || []);
-
     if (step.isCompletedStep) {
         // Completed the lesson!
         document.getElementById('instruction-text').innerHTML = step.text;
         session.currentNote = null;
         drawStaff(null);
+        setupInputMode('keyboard'); // Reset input mode to default keyboard
         
         // Add star reward
         const isFirstCompletion = !state.completedLessons.includes(session.id);
@@ -746,13 +873,20 @@ function runLessonStep() {
     // Draw staff
     drawStaff(step.targetNote);
 
+    // Set up Input Mode (Keyboard or Quiz)
+    setupInputMode(step.inputMode || 'keyboard');
+
+    if (step.inputMode === 'quiz') {
+        generateQuizOptions(step.targetNote);
+    } else {
+        // Highlight active virtual keys helper
+        highlightPianoKeysHelper(step.highlightKeys || []);
+    }
+
     // Progress bar calculation
     const progress = Math.round((session.stepIndex / (session.lessonData.steps.length - 1)) * 100);
     document.getElementById('play-progress-label').textContent = `התקדמות: ${progress}%`;
     document.getElementById('play-progress-bar').style.width = `${progress}%`;
-
-    // Try starting microphone if permissions exist
-    autoStartMicrophone();
 }
 
 // Helper to highlight correct key on virtual keyboard to guide the child
@@ -864,8 +998,11 @@ function runSongStep() {
 
 // --- Loading & Driving Note Quest (מצב תרגול מהיר) ---
 function startPracticeMode() {
+    const practiceType = document.querySelector('input[name="practice-type"]:checked').value; // 'keyboard' or 'quiz'
+    
     state.activeSession = {
         type: 'practice',
+        mode: practiceType, // 'keyboard' or 'quiz'
         stepIndex: 0, // Counts questions answered
         currentNote: null,
         score: 0,
@@ -874,8 +1011,7 @@ function startPracticeMode() {
     };
 
     switchTab('play-area');
-    document.getElementById('play-area-title').textContent = 'תרגול מהיר - אקדמיית התווים ⚡';
-    document.getElementById('app-keyboard-footer').style.display = 'block';
+    document.getElementById('play-area-title').textContent = practiceType === 'quiz' ? 'תרגול מהיר - שאלון אמריקאי 📝' : 'תרגול מהיר - אקדמיית התווים ⚡';
 
     runPracticeStep();
 }
@@ -893,11 +1029,19 @@ function runPracticeStep() {
         session.currentNote = null;
         drawStaff(null);
         highlightPianoKeysHelper([]);
+        setupInputMode('keyboard'); // Reset input mode to keyboard by default
 
         // Save High Score
-        if (session.score > state.practiceHighScore) {
-            state.practiceHighScore = session.score;
-            saveToLocalStorage();
+        if (session.mode === 'quiz') {
+            if (session.score > state.practiceHighScoreQuiz) {
+                state.practiceHighScoreQuiz = session.score;
+                saveToLocalStorage();
+            }
+        } else {
+            if (session.score > state.practiceHighScore) {
+                state.practiceHighScore = session.score;
+                saveToLocalStorage();
+            }
         }
 
         // Grant stars (e.g. 2 stars for completing, +1 star for high score)
@@ -907,7 +1051,8 @@ function runPracticeStep() {
         feedbackBox.textContent = 'האימון הסתיים בהצלחה! 🏆';
         feedbackBox.className = 'feedback-text success';
 
-        document.getElementById('instruction-text').innerHTML = `השגתם <strong style="color: var(--neon-cyan); font-size: 1.8rem;">${session.score} מתוך 10</strong> נקודות!<br>השיא האישי שלכם: ${state.practiceHighScore}`;
+        const bestScore = session.mode === 'quiz' ? state.practiceHighScoreQuiz : state.practiceHighScore;
+        document.getElementById('instruction-text').innerHTML = `השגתם <strong style="color: var(--neon-cyan); font-size: 1.8rem;">${session.score} מתוך 10</strong> נקודות!<br>השיא האישי שלך במצב זה: ${bestScore}`;
 
         document.getElementById('play-progress-label').textContent = 'התקדמות: 100%';
         document.getElementById('play-progress-bar').style.width = '100%';
@@ -933,16 +1078,21 @@ function runPracticeStep() {
 
     session.currentNote = randomNote;
 
-    document.getElementById('instruction-text').innerHTML = `שאלה ${session.stepIndex + 1} מתוך 10:<br>מהו התו המצויר על החמישה? נגנו אותו!`;
-    drawStaff(randomNote);
+    // Set up Input UI
+    setupInputMode(session.mode);
 
-    // No highlights in practice/test mode!
-    highlightPianoKeysHelper([]);
+    if (session.mode === 'quiz') {
+        document.getElementById('instruction-text').innerHTML = `שאלה ${session.stepIndex + 1} מתוך 10:<br>בחרי את השם הנכון של התו המצויר!`;
+        generateQuizOptions(randomNote);
+    } else {
+        document.getElementById('instruction-text').innerHTML = `שאלה ${session.stepIndex + 1} מתוך 10:<br>מהו התו המצויר על החמישה? נגני אותו!`;
+        highlightPianoKeysHelper([]);
+    }
+
+    drawStaff(randomNote);
 
     document.getElementById('play-progress-label').textContent = `התקדמות: ${session.stepIndex}0%`;
     document.getElementById('play-progress-bar').style.width = `${session.stepIndex}0%`;
-
-    autoStartMicrophone();
 }
 
 // --- Verification & Playing Input Cues ---
@@ -1243,6 +1393,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // Register clicks inside panels if needed
     document.getElementById('practice-high-score-val').textContent = state.practiceHighScore;
+    document.getElementById('practice-high-score-quiz-val').textContent = state.practiceHighScoreQuiz;
 });
 
 // --- Reset Progress Function ---
@@ -1255,6 +1406,7 @@ function confirmResetProgress() {
         state.lastPlayedDate = null;
         state.completedLessons = [];
         state.practiceHighScore = 0;
+        state.practiceHighScoreQuiz = 0;
         
         // Save empty state to localStorage
         saveToLocalStorage();
@@ -1273,7 +1425,139 @@ function confirmResetProgress() {
         // Reset element text
         const highScoreVal = document.getElementById('practice-high-score-val');
         if (highScoreVal) highScoreVal.textContent = '0';
+        const highScoreQuizVal = document.getElementById('practice-high-score-quiz-val');
+        if (highScoreQuizVal) highScoreQuizVal.textContent = '0';
         
         alert("ההתקדמות אופסה בהצלחה! בהצלחה מהתחלה! 🚀");
+    }
+}
+
+// --- Multiple Choice (Quiz Mode) Helper Functions ---
+
+let currentQuizOptions = [];
+
+function setupInputMode(mode) {
+    const keyboardFooter = document.getElementById('app-keyboard-footer');
+    const optionsContainer = document.getElementById('play-options-container');
+    const micBanner = document.getElementById('mic-banner');
+    
+    if (mode === 'quiz') {
+        // Hide keyboard & mic banner
+        keyboardFooter.style.display = 'none';
+        micBanner.style.display = 'none';
+        // Show options buttons
+        optionsContainer.style.display = 'grid';
+        // Stop audio listening when doing quiz
+        stopPitchDetection();
+    } else {
+        // Show keyboard & mic banner
+        if (state.currentTab === 'play-area') {
+            keyboardFooter.style.display = 'block';
+            micBanner.style.display = 'flex';
+        }
+        // Hide options buttons
+        optionsContainer.style.display = 'none';
+        // Resume mic if active
+        autoStartMicrophone();
+    }
+}
+
+function generateQuizOptions(correctNoteName) {
+    const noteObj = NOTES_DB.find(n => n.name === correctNoteName);
+    if (!noteObj) return;
+    
+    const correctAnswer = noteObj.hebrew;
+    
+    // Core Hebrew names
+    const allHebrewNames = ['דו', 'רה', 'מי', 'פה', 'סול', 'לה', 'סי'];
+    const incorrectAnswers = allHebrewNames.filter(name => name !== correctAnswer);
+    
+    // Shuffle incorrect answers
+    shuffleArray(incorrectAnswers);
+    
+    // Choose 3 incorrect answers + correct answer
+    const options = [correctAnswer, incorrectAnswers[0], incorrectAnswers[1], incorrectAnswers[2]];
+    shuffleArray(options);
+    
+    currentQuizOptions = options;
+    
+    // Display options on buttons
+    const buttons = document.querySelectorAll('.option-btn');
+    buttons.forEach((btn, idx) => {
+        btn.textContent = options[idx];
+        btn.className = 'option-btn'; // Reset active classes
+        btn.disabled = false;
+    });
+}
+
+function handleOptionSelect(index) {
+    const session = state.activeSession;
+    if (!session || !session.currentNote) return;
+    
+    const selectedAnswer = currentQuizOptions[index];
+    const correctNoteObj = NOTES_DB.find(n => n.name === session.currentNote);
+    const correctAnswer = correctNoteObj.hebrew;
+    
+    const buttons = document.querySelectorAll('.option-btn');
+    const clickedBtn = buttons[index];
+    
+    // Disable all options to prevent double click
+    buttons.forEach(btn => btn.disabled = true);
+    
+    if (selectedAnswer === correctAnswer) {
+        clickedBtn.classList.add('success-active');
+        playNoteSound(correctNoteObj.freq); // Play note pitch as sound feedback
+        
+        const feedbackBox = document.getElementById('feedback-text');
+        feedbackBox.textContent = getRandomEncouragement();
+        feedbackBox.className = 'feedback-text success';
+        
+        setTimeout(() => {
+            if (session.type === 'lesson') {
+                session.stepIndex++;
+                runLessonStep();
+            } else if (session.type === 'practice') {
+                session.score++;
+                session.stepIndex++;
+                runPracticeStep();
+            }
+        }, 900);
+    } else {
+        clickedBtn.classList.add('error-active');
+        playFailBuzzer();
+        
+        // Highlight correct option in green as hint
+        buttons.forEach((btn, idx) => {
+            if (currentQuizOptions[idx] === correctAnswer) {
+                btn.classList.add('success-active');
+            }
+        });
+        
+        const feedbackBox = document.getElementById('feedback-text');
+        feedbackBox.textContent = 'שגיאה! נסי שוב.';
+        feedbackBox.className = 'feedback-text error';
+        
+        setTimeout(() => {
+            if (session.type === 'lesson') {
+                // In lesson mode, reset button classes and let Sol try again
+                buttons.forEach(btn => {
+                    btn.className = 'option-btn';
+                    btn.disabled = false;
+                });
+                feedbackBox.textContent = '';
+            } else if (session.type === 'practice') {
+                // In practice mode, advance to next question
+                session.stepIndex++;
+                runPracticeStep();
+            }
+        }, 1200);
+    }
+}
+
+// Simple array shuffle helper
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
     }
 }

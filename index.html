@@ -95,8 +95,33 @@
                 <div class="welcome-card text-center">
                     <h2>תרגול מהיר - אקדמיית התווים ⚡</h2>
                     <p>כמה מהר תצליחו לזהות 10 תווים ברצף? בואו נבדוק!</p>
+                    
+                    <!-- Mode Selector -->
+                    <div class="practice-mode-selector">
+                        <p class="selector-label">בחרי סוג תרגול:</p>
+                        <div class="mode-options">
+                            <label class="mode-card">
+                                <input type="radio" name="practice-type" value="keyboard" checked>
+                                <span class="mode-card-content">
+                                    <span class="mode-card-icon">🎹</span>
+                                    <span class="mode-card-title">נגינה בפסנתר</span>
+                                    <span class="mode-card-desc">מזהה דרך המיקרופון או המקלדת</span>
+                                </span>
+                            </label>
+                            <label class="mode-card">
+                                <input type="radio" name="practice-type" value="quiz">
+                                <span class="mode-card-content">
+                                    <span class="mode-card-icon">📝</span>
+                                    <span class="mode-card-title">שאלון אמריקאי</span>
+                                    <span class="mode-card-desc">בחירת שם התו מתוך 4 אפשרויות</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="practice-settings">
-                        <p class="practice-high-score">שיא אישי: <span id="practice-high-score-val">0</span> נקודות</p>
+                        <p class="practice-high-score">שיא אישי (נגינה): <span id="practice-high-score-val">0</span> נקודות</p>
+                        <p class="practice-high-score">שיא אישי (שאלון): <span id="practice-high-score-quiz-val">0</span> נקודות</p>
                     </div>
                     <button class="action-btn-large" onclick="startPracticeMode()">התחל אימון מהיר 🎮</button>
                 </div>
@@ -143,6 +168,14 @@
                 <div class="instruction-box" id="instruction-box">
                     <div class="instruction-text" id="instruction-text">טוען שיעור...</div>
                     <div class="feedback-text" id="feedback-text"></div>
+                </div>
+
+                <!-- Multiple Choice Options Container -->
+                <div class="options-container" id="play-options-container" style="display: none;">
+                    <button class="option-btn" onclick="handleOptionSelect(0)"></button>
+                    <button class="option-btn" onclick="handleOptionSelect(1)"></button>
+                    <button class="option-btn" onclick="handleOptionSelect(2)"></button>
+                    <button class="option-btn" onclick="handleOptionSelect(3)"></button>
                 </div>
 
                 <!-- Visual Keyboard Alignment Guide -->
