@@ -235,132 +235,6 @@ const LESSONS_DB = [
                 isCompletedStep: true
             }
         ]
-    },
-    {
-        id: 'lesson-6',
-        title: 'שיעור שמות 1: דו, רה, מי (שאלון אמריקאי)',
-        description: 'נלמד לקשר בין צורת התו לשמו בעברית',
-        steps: [
-            {
-                text: 'בואי נלמד את שמות התווים בשאלון אמריקאי! התו הראשון על קו עזר מתחת לחמישה הוא <strong>דו</strong> (C4). בחרי בכפתור <strong>דו</strong>.',
-                targetNote: 'C4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'התו הבא יושב ממש מתחת לקו הראשון. זהו התו <strong>רה</strong> (D4). בחרי בכפתור <strong>רה</strong>.',
-                targetNote: 'D4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'התו הבא מונח על הקו הראשון. זהו התו <strong>מי</strong> (E4). בחרי בכפתור <strong>מי</strong>.',
-                targetNote: 'E4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'עכשיו תורך לזהות לבד! מהו התו המופיע על החמישה?',
-                targetNote: 'C4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'מהו התו המופיע על החמישה?',
-                targetNote: 'E4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'מהו התו המופיע על החמישה?',
-                targetNote: 'D4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'מצוין! השלמת את לימוד שלושת התווים הראשונים!',
-                targetNote: null,
-                isCompletedStep: true
-            }
-        ]
-    },
-    {
-        id: 'lesson-7',
-        title: 'שיעור שמות 2: פה, סול, לה (שאלון אמריקאי)',
-        description: 'נלמד את התווים הבאים בחמישה',
-        steps: [
-            {
-                text: 'נמשיך לתווים הבאים. התו במרווח הראשון הוא <strong>פה</strong> (F4). בחרי בכפתור <strong>פה</strong>.',
-                targetNote: 'F4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'התו שעל הקו השני הוא <strong>סול</strong> (G4). בחרי בכפתור <strong>סול</strong>.',
-                targetNote: 'G4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'התו שבמרווח השני הוא <strong>לה</strong> (A4). בחרי בכפתור <strong>לה</strong>.',
-                targetNote: 'A4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'נסי לזהות לבד: מהו התו המוצג?',
-                targetNote: 'G4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'ומהו התו הזה?',
-                targetNote: 'F4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'ומהו התו הזה?',
-                targetNote: 'A4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'עבודה נהדרת! זיהית את פה, סול ולה בהצלחה!',
-                targetNote: null,
-                isCompletedStep: true
-            }
-        ]
-    },
-    {
-        id: 'lesson-8',
-        title: 'שיעור שמות 3: סי ודו גבוה (שאלון אמריקאי)',
-        description: 'זיהוי התווים הבאים בסולם',
-        steps: [
-            {
-                text: 'נסיים את הסולם הבסיסי! התו שעל הקו השלישי (האמצעי) הוא <strong>סי</strong> (B4). בחרי בכפתור <strong>סי</strong>.',
-                targetNote: 'B4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'התו שבמרווח השלישי הוא <strong>דו גבוה</strong> (C5). בחרי בכפתור <strong>דו</strong>.',
-                targetNote: 'C5',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'תרגול מהיר: מהו התו המצויר?',
-                targetNote: 'C5',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'מהו התו המצויר?',
-                targetNote: 'B4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'מהו התו המצויר?',
-                targetNote: 'G4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'מהו התו המצויר?',
-                targetNote: 'C4',
-                inputMode: 'quiz'
-            },
-            {
-                text: 'מדהים! סיימת את כל שיעורי שמות התווים! את מוכנה לאתגר התרגול המהיר.',
-                targetNote: null,
-                isCompletedStep: true
-            }
-        ]
     }
 ];
 
@@ -518,6 +392,8 @@ function switchTab(tabId) {
         renderLessonsScreen();
     } else if (tabId === 'songs') {
         renderSongsScreen();
+    } else if (tabId === 'names') {
+        exploreNote('C4');
     }
 }
 
@@ -690,13 +566,24 @@ function renderSongsScreen() {
 
 // --- Play Area Actions ---
 function exitPlayArea() {
-    switchTab(state.activeSession && state.activeSession.type === 'song' ? 'songs' : 'lessons');
+    if (state.activeSession) {
+        if (state.activeSession.type === 'song') {
+            switchTab('songs');
+        } else if (state.activeSession.type === 'names-lesson' || state.activeSession.type === 'series') {
+            switchTab('names');
+        } else {
+            switchTab('lessons');
+        }
+    } else {
+        switchTab('lessons');
+    }
     state.activeSession = null;
 }
 
 // --- SVG Staff Drawing Engine ---
-function drawStaff(highlightNoteName = null) {
-    const svg = document.getElementById('svg-staff');
+function drawStaff(highlightNoteName = null, svgElement = null, showNameLabel = false) {
+    const svg = svgElement || document.getElementById('svg-staff');
+    if (!svg) return;
     svg.innerHTML = ''; // Clear previous drawings
 
     const width = 800;
@@ -719,7 +606,6 @@ function drawStaff(highlightNoteName = null) {
 
     // Draw Treble Clef Symbol (Using a gorgeous SVG Path representation)
     const clef = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    // Simplified Treble Clef Path that looks standard and scales beautifully
     clef.setAttribute('d', 'M 60,175 C 55,170 50,160 52,152 C 55,140 70,135 72,150 C 73,158 65,168 57,166 C 53,165 48,155 52,143 C 58,125 78,110 78,85 C 78,60 67,40 60,15 L 57,15 C 55,45 61,70 52,95 C 44,115 30,130 30,150 C 30,178 52,195 72,192 C 85,190 92,175 92,160 C 92,130 68,115 62,90 L 67,45 C 70,40 73,42 71,50 C 62,100 85,120 85,150 C 85,170 75,180 60,175 Z');
     clef.setAttribute('fill', 'var(--neon-cyan)');
     clef.setAttribute('filter', 'drop-shadow(0 0 6px rgba(0, 242, 254, 0.5))');
@@ -798,6 +684,20 @@ function drawStaff(highlightNoteName = null) {
                 accidental.textContent = '♯';
                 svg.appendChild(accidental);
             }
+
+            // Draw note name next to it if requested
+            if (showNameLabel) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', (noteX + 45).toString());
+                text.setAttribute('y', (noteY + 9).toString());
+                text.setAttribute('font-size', '28');
+                text.setAttribute('font-weight', 'bold');
+                text.setAttribute('fill', '#ffffff');
+                text.setAttribute('filter', 'drop-shadow(0 0 5px rgba(255, 255, 255, 0.5))');
+                text.setAttribute('text-anchor', 'start');
+                text.textContent = noteObj.hebrew;
+                svg.appendChild(text);
+            }
         }
     }
 }
@@ -825,6 +725,10 @@ function loadLesson(lessonId) {
 function runLessonStep() {
     const session = state.activeSession;
     const step = session.lessonData.steps[session.stepIndex];
+
+    // Remove any extra button elements in instruction-box to prevent duplication
+    const extraButtons = document.getElementById('instruction-box').querySelectorAll('button');
+    extraButtons.forEach(btn => btn.remove());
 
     // Reset feedback UI
     const feedbackBox = document.getElementById('feedback-text');
@@ -854,7 +758,9 @@ function runLessonStep() {
 
         // Add a giant button to finish
         setTimeout(() => {
+            if (document.getElementById('lesson-finish-btn')) return;
             const finishBtn = document.createElement('button');
+            finishBtn.id = 'lesson-finish-btn';
             finishBtn.className = 'action-btn-large pulse';
             finishBtn.style.marginTop = '1.5rem';
             finishBtn.textContent = 'סיים שיעור 🏆';
@@ -926,6 +832,10 @@ function runSongStep() {
     const song = session.songData;
     const idx = session.stepIndex;
 
+    // Remove any extra button elements in instruction-box to prevent duplication
+    const extraButtons = document.getElementById('instruction-box').querySelectorAll('button');
+    extraButtons.forEach(btn => btn.remove());
+
     // Clear feedback
     const feedbackBox = document.getElementById('feedback-text');
     feedbackBox.textContent = '';
@@ -962,7 +872,9 @@ function runSongStep() {
         document.getElementById('play-progress-bar').style.width = '100%';
 
         setTimeout(() => {
+            if (document.getElementById('song-finish-btn')) return;
             const finishBtn = document.createElement('button');
+            finishBtn.id = 'song-finish-btn';
             finishBtn.className = 'action-btn-large pulse';
             finishBtn.style.marginTop = '1.5rem';
             finishBtn.textContent = 'חזרה לסטודיו השירים 🏆';
@@ -1018,6 +930,10 @@ function startPracticeMode() {
 
 function runPracticeStep() {
     const session = state.activeSession;
+
+    // Remove any extra button elements in instruction-box to prevent duplication
+    const extraButtons = document.getElementById('instruction-box').querySelectorAll('button');
+    extraButtons.forEach(btn => btn.remove());
     
     // Clear feedback
     const feedbackBox = document.getElementById('feedback-text');
@@ -1058,7 +974,9 @@ function runPracticeStep() {
         document.getElementById('play-progress-bar').style.width = '100%';
 
         setTimeout(() => {
+            if (document.getElementById('practice-finish-btn')) return;
             const finishBtn = document.createElement('button');
+            finishBtn.id = 'practice-finish-btn';
             finishBtn.className = 'action-btn-large pulse';
             finishBtn.style.marginTop = '1.5rem';
             finishBtn.textContent = 'חזרה לתפריט 🏁';
@@ -1440,14 +1358,31 @@ function setupInputMode(mode) {
     const keyboardFooter = document.getElementById('app-keyboard-footer');
     const optionsContainer = document.getElementById('play-options-container');
     const micBanner = document.getElementById('mic-banner');
+    const playSeriesContainer = document.getElementById('play-series-container');
     
     if (mode === 'quiz') {
         // Hide keyboard & mic banner
         keyboardFooter.style.display = 'none';
         micBanner.style.display = 'none';
+        if (playSeriesContainer) playSeriesContainer.style.display = 'none';
         // Show options buttons
         optionsContainer.style.display = 'grid';
         // Stop audio listening when doing quiz
+        stopPitchDetection();
+    } else if (mode === 'series') {
+        // Hide keyboard, mic banner, and quiz options
+        keyboardFooter.style.display = 'none';
+        micBanner.style.display = 'none';
+        optionsContainer.style.display = 'none';
+        // Show series container
+        if (playSeriesContainer) playSeriesContainer.style.display = 'block';
+        stopPitchDetection();
+    } else if (mode === 'names-lesson') {
+        // Hide keyboard, mic banner, quiz options, and series container
+        keyboardFooter.style.display = 'none';
+        micBanner.style.display = 'none';
+        optionsContainer.style.display = 'none';
+        if (playSeriesContainer) playSeriesContainer.style.display = 'none';
         stopPitchDetection();
     } else {
         // Show keyboard & mic banner
@@ -1455,8 +1390,9 @@ function setupInputMode(mode) {
             keyboardFooter.style.display = 'block';
             micBanner.style.display = 'flex';
         }
-        // Hide options buttons
+        // Hide options buttons and series container
         optionsContainer.style.display = 'none';
+        if (playSeriesContainer) playSeriesContainer.style.display = 'none';
         // Resume mic if active
         autoStartMicrophone();
     }
@@ -1560,4 +1496,500 @@ function shuffleArray(array) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
+}
+
+// ==========================================
+// Note Names Tab Activities
+// ==========================================
+
+function getNoteLocationDescription(noteObj) {
+    switch(noteObj.name) {
+        case 'C4': return 'התו דו אמצעי (Middle C) נמצא מתחת לחמישה, ויושב על קו עזר קטן משלו.';
+        case 'D4': return 'התו רה ממוקם ממש מתחת לקו הראשון (התחתון) של החמישה, בלי לחצות אותו.';
+        case 'E4': return 'התו מי יושב בדיוק על הקו הראשון (התחתון) של החמישה.';
+        case 'F4': return 'התו פה יושב במרווח הראשון של החמישה (בין הקו הראשון לשני).';
+        case 'G4': return 'התו סול יושב על הקו השני של החמישה. זהו הקו שממנו מתחיל הציור של מפתח סול!';
+        case 'A4': return 'התו לה יושב במרווח השני של החמישה (בין הקו השני לשלישי).';
+        case 'B4': return 'התו סי יושב בדיוק על הקו השלישי (האמצעי) של החמישה.';
+        case 'C5': return 'התו דו גבוה יושב במרווח השלישי של החמישה.';
+        default: return `התו ${noteObj.hebrew} ממוקם בגובה של ${noteObj.name}.`;
+    }
+}
+
+function exploreNote(noteName) {
+    const svg = document.getElementById('svg-explore-staff');
+    if (!svg) return;
+    
+    // Draw staff with name label next to it
+    drawStaff(noteName, svg, true);
+    
+    const noteObj = NOTES_DB.find(n => n.name === noteName);
+    if (noteObj) {
+        // Play note sound
+        playNoteSound(noteObj.freq);
+        
+        // Update info box
+        const titleEl = document.getElementById('explore-info-title');
+        const descEl = document.getElementById('explore-info-desc');
+        if (titleEl) titleEl.innerHTML = `התו <strong style="color: var(--neon-cyan);">${noteObj.hebrew}</strong> (${noteObj.english})`;
+        if (descEl) descEl.textContent = getNoteLocationDescription(noteObj);
+    }
+    
+    // Highlight active button
+    document.querySelectorAll('.explore-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(noteName)) {
+            btn.classList.add('active');
+        }
+    });
+}
+
+function startNamesLesson() {
+    state.activeSession = {
+        type: 'names-lesson',
+        stepIndex: 0,
+        notes: ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5']
+    };
+
+    switchTab('play-area');
+    document.getElementById('play-area-title').textContent = 'שיעור שמות תווים 📖';
+    
+    // Clear extra buttons in instruction box
+    const extraButtons = document.getElementById('instruction-box').querySelectorAll('button');
+    extraButtons.forEach(btn => btn.remove());
+    
+    setupInputMode('names-lesson');
+    runNamesLessonStep();
+}
+
+function runNamesLessonStep() {
+    const session = state.activeSession;
+    if (!session || session.type !== 'names-lesson') return;
+
+    const noteName = session.notes[session.stepIndex];
+    const noteObj = NOTES_DB.find(n => n.name === noteName);
+    if (!noteObj) return;
+
+    // Reset feedback UI
+    const feedbackBox = document.getElementById('feedback-text');
+    feedbackBox.innerHTML = '';
+    feedbackBox.className = 'feedback-text';
+
+    // Play note sound
+    playNoteSound(noteObj.freq);
+
+    // Draw staff with name label next to it
+    drawStaff(noteName, null, true);
+
+    // Set instruction text
+    document.getElementById('instruction-text').innerHTML = `
+        <div style="font-size: 1.5rem; margin-bottom: 0.8rem;">
+            זהו התו <strong style="color: var(--neon-cyan); font-size: 2.2rem;">${noteObj.hebrew}</strong> (${noteObj.name}).
+        </div>
+        <p style="font-size: 1.1rem; color: #ccc; max-width: 600px; margin: 0 auto;">
+            ${getNoteLocationDescription(noteObj)}
+        </p>
+    `;
+
+    // Render navigation buttons inside feedback-text
+    const navContainer = document.createElement('div');
+    navContainer.style.display = 'flex';
+    navContainer.style.justifyContent = 'center';
+    navContainer.style.gap = '1rem';
+    navContainer.style.marginTop = '1.5rem';
+
+    if (session.stepIndex > 0) {
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'action-btn-secondary';
+        prevBtn.textContent = '➡️ הקודם';
+        prevBtn.onclick = () => {
+            session.stepIndex--;
+            runNamesLessonStep();
+        };
+        navContainer.appendChild(prevBtn);
+    }
+
+    // Sound replay button
+    const soundBtn = document.createElement('button');
+    soundBtn.className = 'action-btn-secondary';
+    soundBtn.textContent = '🔊 השמע שוב';
+    soundBtn.onclick = () => playNoteSound(noteObj.freq);
+    navContainer.appendChild(soundBtn);
+
+    if (session.stepIndex < session.notes.length - 1) {
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'action-btn-large';
+        nextBtn.textContent = 'הבא ⬅️';
+        nextBtn.onclick = () => {
+            session.stepIndex++;
+            runNamesLessonStep();
+        };
+        navContainer.appendChild(nextBtn);
+    } else {
+        const finishBtn = document.createElement('button');
+        finishBtn.className = 'action-btn-large pulse';
+        finishBtn.textContent = 'סיים שיעור 🏆';
+        finishBtn.onclick = () => {
+            const isFirstCompletion = !state.completedLessons.includes('names-lesson');
+            if (isFirstCompletion) {
+                state.completedLessons.push('names-lesson');
+                updateStreakAndStars(5);
+            }
+            playSuccessChime();
+            alert("כל הכבוד, סול! סיימת את שיעור שמות התווים! 🎉");
+            exitPlayArea();
+        };
+        navContainer.appendChild(finishBtn);
+    }
+
+    feedbackBox.appendChild(navContainer);
+
+    // Update progress bar
+    const progress = Math.round((session.stepIndex / (session.notes.length - 1)) * 100);
+    document.getElementById('play-progress-label').textContent = `התקדמות: ${progress}%`;
+    document.getElementById('play-progress-bar').style.width = `${progress}%`;
+}
+
+function drawSeriesStaff(notesList, activeIndex = -1, evaluationResults = null) {
+    const svg = document.getElementById('svg-staff');
+    if (!svg) return;
+    svg.innerHTML = ''; // Clear
+
+    const width = 800;
+    const height = 240;
+    const bottomLineY = 160;
+    const lineSpacing = 20;
+
+    // Draw 5 staff lines
+    for (let i = 0; i < 5; i++) {
+        const y = bottomLineY - (i * lineSpacing);
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', '20');
+        line.setAttribute('y1', y);
+        line.setAttribute('x2', '780');
+        line.setAttribute('y2', y);
+        line.setAttribute('stroke', 'rgba(255, 255, 255, 0.25)');
+        line.setAttribute('stroke-width', '2');
+        svg.appendChild(line);
+    }
+
+    // Draw Treble Clef
+    const clef = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    clef.setAttribute('d', 'M 60,175 C 55,170 50,160 52,152 C 55,140 70,135 72,150 C 73,158 65,168 57,166 C 53,165 48,155 52,143 C 58,125 78,110 78,85 C 78,60 67,40 60,15 L 57,15 C 55,45 61,70 52,95 C 44,115 30,130 30,150 C 30,178 52,195 72,192 C 85,190 92,175 92,160 C 92,130 68,115 62,90 L 67,45 C 70,40 73,42 71,50 C 62,100 85,120 85,150 C 85,170 75,180 60,175 Z');
+    clef.setAttribute('fill', 'var(--neon-cyan)');
+    clef.setAttribute('filter', 'drop-shadow(0 0 6px rgba(0, 242, 254, 0.5))');
+    svg.appendChild(clef);
+
+    // Calculate X coordinates
+    const numNotes = notesList.length;
+    const startX = numNotes === 3 ? 280 : 200;
+    const endX = numNotes === 3 ? 620 : 680;
+    const stepX = numNotes === 1 ? 400 : (endX - startX) / (numNotes - 1);
+
+    notesList.forEach((noteName, idx) => {
+        const noteObj = NOTES_DB.find(n => n.name === noteName);
+        if (!noteObj) return;
+
+        const noteX = startX + idx * stepX;
+        const noteY = bottomLineY - (noteObj.offset * lineSpacing);
+
+        // Determine note color/glow based on active/correct/incorrect state
+        let fill = '#ffffff';
+        let glow = 'none';
+        let isCurrent = (idx === activeIndex);
+        
+        if (evaluationResults) {
+            const isCorrect = evaluationResults[idx];
+            fill = isCorrect ? 'var(--neon-green)' : 'var(--neon-pink)';
+            glow = isCorrect ? 'drop-shadow(0 0 8px rgba(57, 255, 20, 0.8))' : 'drop-shadow(0 0 8px rgba(255, 0, 127, 0.8))';
+        } else if (isCurrent) {
+            fill = 'var(--neon-cyan)';
+            glow = 'drop-shadow(0 0 10px rgba(0, 242, 254, 0.8))';
+        }
+
+        // Draw ledger lines
+        if (noteObj.offset <= -1.0) {
+            for (let y = bottomLineY + lineSpacing; y <= noteY; y += lineSpacing) {
+                const ledger = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                ledger.setAttribute('x1', (noteX - 25).toString());
+                ledger.setAttribute('y1', y.toString());
+                ledger.setAttribute('x2', (noteX + 25).toString());
+                ledger.setAttribute('y2', y.toString());
+                ledger.setAttribute('stroke', fill);
+                ledger.setAttribute('stroke-width', '2');
+                svg.appendChild(ledger);
+            }
+        } else if (noteObj.offset >= 5.0) {
+            for (let y = bottomLineY - (5 * lineSpacing); y >= noteY; y -= lineSpacing) {
+                const ledger = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                ledger.setAttribute('x1', (noteX - 25).toString());
+                ledger.setAttribute('y1', y.toString());
+                ledger.setAttribute('x2', (noteX + 25).toString());
+                ledger.setAttribute('y2', y.toString());
+                ledger.setAttribute('stroke', fill);
+                ledger.setAttribute('stroke-width', '2');
+                svg.appendChild(ledger);
+            }
+        }
+
+        // Draw Note oval
+        const ellipse = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+        ellipse.setAttribute('cx', noteX.toString());
+        ellipse.setAttribute('cy', noteY.toString());
+        ellipse.setAttribute('rx', '15');
+        ellipse.setAttribute('ry', '11');
+        ellipse.setAttribute('fill', fill);
+        if (glow !== 'none') {
+            ellipse.setAttribute('filter', glow);
+        }
+        svg.appendChild(ellipse);
+
+        // Draw Stem
+        const stem = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        if (noteObj.offset >= 2.0) {
+            stem.setAttribute('x1', (noteX - 14).toString());
+            stem.setAttribute('y1', noteY.toString());
+            stem.setAttribute('x2', (noteX - 14).toString());
+            stem.setAttribute('y2', (noteY + 55).toString());
+        } else {
+            stem.setAttribute('x1', (noteX + 14).toString());
+            stem.setAttribute('y1', noteY.toString());
+            stem.setAttribute('x2', (noteX + 14).toString());
+            stem.setAttribute('y2', (noteY - 55).toString());
+        }
+        stem.setAttribute('stroke', fill);
+        stem.setAttribute('stroke-width', '3');
+        svg.appendChild(stem);
+
+        // Draw accidental if any
+        if (noteObj.accidental === 'sharp') {
+            const accidental = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            accidental.setAttribute('x', (noteX - 35).toString());
+            accidental.setAttribute('y', (noteY + 8).toString());
+            accidental.setAttribute('font-size', '30');
+            accidental.setAttribute('fill', fill);
+            accidental.textContent = '♯';
+            svg.appendChild(accidental);
+        }
+
+        // Draw note index number above/below the note
+        const numberText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        numberText.setAttribute('x', noteX.toString());
+        const numberY = noteObj.offset >= 3.0 ? noteY + 80 : noteY - 70;
+        numberText.setAttribute('y', numberY.toString());
+        numberText.setAttribute('font-size', '16');
+        numberText.setAttribute('font-weight', 'bold');
+        numberText.setAttribute('fill', isCurrent ? 'var(--neon-cyan)' : 'rgba(255, 255, 255, 0.6)');
+        numberText.setAttribute('text-anchor', 'middle');
+        numberText.textContent = `תו ${idx + 1}`;
+        svg.appendChild(numberText);
+    });
+}
+
+function startSeriesPractice() {
+    const lengthRadio = document.querySelector('input[name="series-length"]:checked');
+    const length = lengthRadio ? parseInt(lengthRadio.value) : 3;
+
+    const notesPool = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'];
+    const notes = [];
+    for (let i = 0; i < length; i++) {
+        notes.push(notesPool[Math.floor(Math.random() * notesPool.length)]);
+    }
+
+    state.activeSession = {
+        type: 'series',
+        notes: notes,
+        userAnswers: Array(length).fill(''),
+        activeIndex: 0
+    };
+
+    switchTab('play-area');
+    document.getElementById('play-area-title').textContent = `תרגול סדרת ${length} תווים ✍️`;
+    
+    // Clear extra buttons in instruction box
+    const extraButtons = document.getElementById('instruction-box').querySelectorAll('button');
+    extraButtons.forEach(btn => btn.remove());
+
+    // Reset feedback text & class
+    const feedbackBox = document.getElementById('feedback-text');
+    feedbackBox.textContent = '';
+    feedbackBox.className = 'feedback-text';
+
+    // Show keyboard and verify button
+    const keyboardEl = document.querySelector('.series-keyboard');
+    if (keyboardEl) keyboardEl.style.display = 'flex';
+    const checkBtnEl = document.getElementById('check-series-btn');
+    if (checkBtnEl) checkBtnEl.style.display = 'block';
+
+    setupInputMode('series');
+    renderSeriesStep();
+}
+
+function renderSeriesStep() {
+    const session = state.activeSession;
+    if (!session || session.type !== 'series') return;
+
+    document.getElementById('instruction-text').innerHTML = `
+        הקלידי את השם של כל תו בסדרה לפי הסדר.<br>
+        לחצי על תו בסדרה או על התיבות למטה כדי לשנות את הבחירה.
+    `;
+
+    // Draw staff with multiple notes
+    drawSeriesStaff(session.notes, session.activeIndex);
+
+    // Render slots
+    const slotsContainer = document.getElementById('series-slots');
+    slotsContainer.innerHTML = '';
+
+    session.notes.forEach((note, idx) => {
+        const slot = document.createElement('div');
+        slot.className = `series-slot ${idx === session.activeIndex ? 'active' : ''} ${session.userAnswers[idx] ? 'filled' : ''}`;
+        
+        slot.onclick = () => {
+            session.activeIndex = idx;
+            renderSeriesStep();
+        };
+
+        const numLabel = document.createElement('span');
+        numLabel.className = 'series-slot-number';
+        numLabel.textContent = idx + 1;
+
+        const valLabel = document.createElement('span');
+        valLabel.className = 'series-slot-value';
+        valLabel.textContent = session.userAnswers[idx] || '___';
+
+        slot.appendChild(numLabel);
+        slot.appendChild(valLabel);
+        slotsContainer.appendChild(slot);
+    });
+
+    // Toggle button state
+    const allFilled = session.userAnswers.every(ans => ans !== '');
+    const checkBtn = document.getElementById('check-series-btn');
+    if (checkBtn) checkBtn.disabled = !allFilled;
+
+    // Progress bar
+    const filledCount = session.userAnswers.filter(ans => ans !== '').length;
+    const progress = Math.round((filledCount / session.notes.length) * 100);
+    document.getElementById('play-progress-label').textContent = `מולא: ${filledCount}/${session.notes.length}`;
+    document.getElementById('play-progress-bar').style.width = `${progress}%`;
+}
+
+function typeSeriesNote(hebrewName) {
+    const session = state.activeSession;
+    if (!session || session.type !== 'series') return;
+
+    session.userAnswers[session.activeIndex] = hebrewName;
+
+    // Play note sound
+    const activeNoteName = session.notes[session.activeIndex];
+    const noteObj = NOTES_DB.find(n => n.name === activeNoteName);
+    if (noteObj) playNoteSound(noteObj.freq);
+
+    // Advance index to next empty slot or just the next index
+    if (session.activeIndex < session.notes.length - 1) {
+        session.activeIndex++;
+    } else {
+        const firstEmpty = session.userAnswers.indexOf('');
+        if (firstEmpty !== -1) {
+            session.activeIndex = firstEmpty;
+        }
+    }
+
+    renderSeriesStep();
+}
+
+function checkSeriesAnswers() {
+    const session = state.activeSession;
+    if (!session || session.type !== 'series') return;
+
+    const evaluation = session.notes.map((noteName, idx) => {
+        const noteObj = NOTES_DB.find(n => n.name === noteName);
+        return session.userAnswers[idx] === noteObj.hebrew;
+    });
+
+    // Re-draw staff showing colors (green/red)
+    drawSeriesStaff(session.notes, -1, evaluation);
+
+    // Draw slots showing correctness
+    const slotsContainer = document.getElementById('series-slots');
+    slotsContainer.innerHTML = '';
+
+    evaluation.forEach((isCorrect, idx) => {
+        const slot = document.createElement('div');
+        slot.className = `series-slot ${isCorrect ? 'correct' : 'incorrect'}`;
+
+        const numLabel = document.createElement('span');
+        numLabel.className = 'series-slot-number';
+        numLabel.textContent = idx + 1;
+
+        const valLabel = document.createElement('span');
+        valLabel.className = 'series-slot-value';
+        valLabel.textContent = session.userAnswers[idx];
+
+        slot.appendChild(numLabel);
+        slot.appendChild(valLabel);
+
+        if (!isCorrect) {
+            const correctNoteObj = NOTES_DB.find(n => n.name === session.notes[idx]);
+            const correctLabel = document.createElement('div');
+            correctLabel.className = 'series-slot-correct-answer';
+            correctLabel.textContent = `(נכון: ${correctNoteObj.hebrew})`;
+            slot.appendChild(correctLabel);
+        }
+
+        slotsContainer.appendChild(slot);
+    });
+
+    // Hide input helpers
+    const keyboardEl = document.querySelector('.series-keyboard');
+    if (keyboardEl) keyboardEl.style.display = 'none';
+    const checkBtnEl = document.getElementById('check-series-btn');
+    if (checkBtnEl) checkBtnEl.style.display = 'none';
+
+    // Check overall result
+    const allCorrect = evaluation.every(x => x);
+    const feedbackBox = document.getElementById('feedback-text');
+
+    if (allCorrect) {
+        playSuccessChime();
+        updateStreakAndStars(session.notes.length === 3 ? 3 : 5);
+        feedbackBox.innerHTML = `
+            <div style="color: var(--neon-green); font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">
+                כל הכבוד, סול! ענית נכון על כל התווים! 🎉 (+${session.notes.length === 3 ? 3 : 5} כוכבים)
+            </div>
+        `;
+    } else {
+        playFailBuzzer();
+        feedbackBox.innerHTML = `
+            <div style="color: var(--neon-pink); font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">
+                חלק מהתשובות אינן נכונות. לא נורא, נסי שוב! 💪
+            </div>
+        `;
+    }
+
+    // Action buttons
+    const actionContainer = document.createElement('div');
+    actionContainer.style.display = 'flex';
+    actionContainer.style.justifyContent = 'center';
+    actionContainer.style.gap = '1rem';
+    actionContainer.style.marginTop = '1rem';
+
+    const retryBtn = document.createElement('button');
+    retryBtn.className = 'action-btn-secondary';
+    retryBtn.textContent = '🔄 תרגיל חדש';
+    retryBtn.onclick = () => {
+        startSeriesPractice();
+    };
+    actionContainer.appendChild(retryBtn);
+
+    const backBtn = document.createElement('button');
+    backBtn.className = 'action-btn-large';
+    backBtn.textContent = '🏠 סיום וחזרה';
+    backBtn.onclick = () => {
+        switchTab('names');
+    };
+    actionContainer.appendChild(backBtn);
+
+    feedbackBox.appendChild(actionContainer);
 }

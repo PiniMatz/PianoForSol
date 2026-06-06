@@ -22,6 +22,7 @@
             <nav class="app-nav">
                 <button class="nav-btn active" id="tab-home" onclick="switchTab('home')">🏠 ראשי</button>
                 <button class="nav-btn" id="tab-lessons" onclick="switchTab('lessons')">📚 שיעורים</button>
+                <button class="nav-btn" id="tab-names" onclick="switchTab('names')">📝 שמות תווים</button>
                 <button class="nav-btn" id="tab-practice" onclick="switchTab('practice')">⚡ תרגול מהיר</button>
                 <button class="nav-btn" id="tab-songs" onclick="switchTab('songs')">🎵 שירים</button>
             </nav>
@@ -89,6 +90,80 @@
                     <!-- Dynamic lesson nodes will be generated here -->
                 </div>
             </section>
+
+            <!-- NAMES VIEW (לימוד ושאלון שמות תווים) -->
+            <section class="content-panel" id="panel-names">
+                <div class="section-header">
+                    <h2>הכרת התווים ושמותיהם 📝</h2>
+                    <p>בואו נלמד לזהות את התווים לפי שמם (דו, רה, מי...) ונפתור תרגילי כתיבה!</p>
+                </div>
+
+                <!-- Guided Name Learning Lesson -->
+                <div class="welcome-card">
+                    <h3>📖 שיעור שמות תווים (תהליך למידה)</h3>
+                    <p>בואי נעבור על התווים שלב-אחר-שלב. נציג לך כל תו על החמישה יחד עם השם שלו והצליל שלו, ללא צורך בשאלות!</p>
+                    <button class="action-btn-large pulse" style="margin-bottom: 0.5rem;" onclick="startNamesLesson()">התחל שיעור שמות תווים 🚀</button>
+                </div>
+
+                <!-- Learning Guide Subsection (Interactive Reference) -->
+                <div class="welcome-card">
+                    <h3>📖 מדריך התווים האינטראקטיבי</h3>
+                    <p>לחצי על אחד התווים למטה כדי לראות את המיקום שלו על החמישה ולשמוע את הצליל שלו:</p>
+                    
+                    <div class="names-explore-area">
+                        <!-- Small Staff display for exploration -->
+                        <div class="staff-container compact-staff">
+                            <svg id="svg-explore-staff" viewBox="0 0 800 240" preserveAspectRatio="xMidYMid meet">
+                                <!-- Drawn dynamically by app.js -->
+                            </svg>
+                        </div>
+                        
+                        <div class="explore-info-box" id="explore-info-box">
+                            <div class="explore-info-title" id="explore-info-title">בחרי תו למטה כדי להתחיל</div>
+                            <div class="explore-info-desc" id="explore-info-desc">המיקום של התו וההסבר שלו יופיעו כאן.</div>
+                        </div>
+
+                        <!-- 8 white note buttons for guide -->
+                        <div class="explore-buttons">
+                            <button class="explore-btn" onclick="exploreNote('C4')">דו (C4)</button>
+                            <button class="explore-btn" onclick="exploreNote('D4')">רה (D4)</button>
+                            <button class="explore-btn" onclick="exploreNote('E4')">מי (E4)</button>
+                            <button class="explore-btn" onclick="exploreNote('F4')">פה (F4)</button>
+                            <button class="explore-btn" onclick="exploreNote('G4')">סול (G4)</button>
+                            <button class="explore-btn" onclick="exploreNote('A4')">לה (A4)</button>
+                            <button class="explore-btn" onclick="exploreNote('B4')">סי (B4)</button>
+                            <button class="explore-btn" onclick="exploreNote('C5')">דו ⬆️ (C5)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Practice Writing Series Subsection -->
+                <div class="welcome-card">
+                    <h3>✍️ תרגול סדרות (כתיבת שם התו)</h3>
+                    <p>האפליקציה תציג 3 או 5 תווים ברצף על החמישה, ויהיה עלייך לכתוב את השמות של כולם!</p>
+                    
+                    <div class="series-settings">
+                        <p class="selector-label">אורך הסדרה:</p>
+                        <div class="series-length-options">
+                            <label class="mode-card">
+                                <input type="radio" name="series-length" value="3" checked>
+                                <span class="mode-card-content">
+                                    <span class="mode-card-title">3 תווים</span>
+                                    <span class="mode-card-desc">תרגיל קצר לחימום</span>
+                                </span>
+                            </label>
+                            <label class="mode-card">
+                                <input type="radio" name="series-length" value="5">
+                                <span class="mode-card-content">
+                                    <span class="mode-card-title">5 תווים</span>
+                                    <span class="mode-card-desc">תרגיל מאתגר וארוך יותר</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button class="action-btn-large" style="margin-top: 1.5rem;" onclick="startSeriesPractice()">התחל תרגול כתיבה ✍️</button>
+                </div>
 
             <!-- PRACTICE / NOTE QUEST SCREEN -->
             <section class="content-panel" id="panel-practice">
@@ -176,6 +251,25 @@
                     <button class="option-btn" onclick="handleOptionSelect(1)"></button>
                     <button class="option-btn" onclick="handleOptionSelect(2)"></button>
                     <button class="option-btn" onclick="handleOptionSelect(3)"></button>
+                </div>
+
+                <!-- Play Series Quiz Container (Writing Note Names) -->
+                <div class="play-series-container" id="play-series-container" style="display: none;">
+                    <div class="series-slots" id="series-slots">
+                        <!-- Dynamic slots like: [__] [__] [__] with labels under them -->
+                    </div>
+                    
+                    <div class="series-keyboard">
+                        <button class="series-key-btn" onclick="typeSeriesNote('דו')">דו</button>
+                        <button class="series-key-btn" onclick="typeSeriesNote('רה')">רה</button>
+                        <button class="series-key-btn" onclick="typeSeriesNote('מי')">מי</button>
+                        <button class="series-key-btn" onclick="typeSeriesNote('פה')">פה</button>
+                        <button class="series-key-btn" onclick="typeSeriesNote('סול')">סול</button>
+                        <button class="series-key-btn" onclick="typeSeriesNote('לה')">לה</button>
+                        <button class="series-key-btn" onclick="typeSeriesNote('סי')">סי</button>
+                    </div>
+
+                    <button class="check-series-btn" id="check-series-btn" onclick="checkSeriesAnswers()" disabled>בדיקת תשובות 🎯</button>
                 </div>
 
                 <!-- Visual Keyboard Alignment Guide -->
