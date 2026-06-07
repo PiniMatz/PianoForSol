@@ -543,11 +543,10 @@ body {
 .mic-status-banner.active {
     background: rgba(57, 255, 20, 0.1);
     border-color: rgba(57, 255, 20, 0.3);
-    cursor: default;
 }
 
 .mic-status-banner.active:hover {
-    transform: none;
+    transform: translateY(-2px);
 }
 
 .mic-icon {

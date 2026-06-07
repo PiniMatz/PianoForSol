@@ -906,7 +906,7 @@ function runSongStep() {
     document.getElementById('play-progress-label').textContent = `התקדמות: ${progress}%`;
     document.getElementById('play-progress-bar').style.width = `${progress}%`;
 
-    autoStartMicrophone();
+    setupInputMode('keyboard');
 }
 
 // --- Loading & Driving Note Quest (מצב תרגול מהיר) ---
@@ -1022,7 +1022,13 @@ function handlePlayInput(notePlayed) {
     // Trigger visual note press feedback on Virtual Keyboard
     const key = document.querySelector(`.piano-key[data-note="${notePlayed}"]`);
     
-    if (notePlayed === session.currentNote) {
+    const targetNoteObj = NOTES_DB.find(n => n.name === session.currentNote);
+    const playedNoteObj = NOTES_DB.find(n => n.name === notePlayed);
+    
+    const isExactMatch = (notePlayed === session.currentNote);
+    const isNoteNameMatch = targetNoteObj && playedNoteObj && (targetNoteObj.hebrew === playedNoteObj.hebrew);
+    
+    if (isExactMatch || isNoteNameMatch) {
         // CORRECT PLAY!
         playNoteSound(NOTES_DB.find(n => n.name === notePlayed).freq);
         
@@ -1126,8 +1132,10 @@ window.addEventListener('keydown', e => {
 // --- Microphone Listening & Pitch Detection Module ---
 
 function autoStartMicrophone() {
-    // If browser supports getUserMedia and we haven't requested yet
-    if (!state.micActive && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    if (state.micActive) {
+        // If microphone is already active, resume the pitch detection interval
+        startPitchDetection();
+    } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         // Let banner display click instruction. If already approved once, we can try to init
         if (localStorage.getItem('mic_approved') === 'true') {
             initMicrophone();
@@ -1135,14 +1143,25 @@ function autoStartMicrophone() {
     }
 }
 
-function initMicrophone() {
-    if (state.micActive) return;
+function initMicrophone(force = false) {
+    if (state.micActive && !force) {
+        // If already active, check if AudioContext is suspended and try to resume it
+        if (state.audioContext && state.audioContext.state === 'suspended') {
+            state.audioContext.resume().then(() => {
+                updateMicBannerStatus();
+                startPitchDetection();
+            });
+        } else {
+            // Otherwise, force a complete restart of the stream
+            restartMicrophone();
+        }
+        return;
+    }
 
     const bannerText = document.getElementById('mic-banner-text');
-    const banner = document.getElementById('mic-banner');
     const bannerIcon = document.getElementById('mic-banner-icon');
 
-    bannerText.textContent = "מבקש גישה למיקרופון...";
+    if (bannerText) bannerText.textContent = "מבקש גישה למיקרופון...";
     
     navigator.mediaDevices.getUserMedia({ audio: true })
         .then(stream => {
@@ -1150,33 +1169,105 @@ function initMicrophone() {
             state.microphoneStream = stream;
             localStorage.setItem('mic_approved', 'true');
 
-            // Visual indicator active
-            banner.classList.add('active');
-            bannerIcon.textContent = "🟢";
-            bannerText.textContent = "מיקרופון פעיל! נגנו בפסנתר האמיתי שלכם והאפליקציה תאזין.";
-
             // Start Audio Context & Pitch Analyzer
             if (!state.audioContext) {
                 state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
+            
+            // Set up state change listener
+            state.audioContext.onstatechange = () => {
+                updateMicBannerStatus();
+            };
+
             const source = state.audioContext.createMediaStreamSource(stream);
             
             state.analyser = state.audioContext.createAnalyser();
             state.analyser.fftSize = 2048; // Size of sample buffer
             source.connect(state.analyser);
 
+            updateMicBannerStatus();
+
             // Periodically analyze audio pitch
             startPitchDetection();
         })
         .catch(err => {
             console.error("Microphone permission denied:", err);
-            bannerIcon.textContent = "❌";
-            bannerText.textContent = "גישת המיקרופון נדחתה. לא נוכל להאזין לפסנתר. נגנו באמצעות המקלדת שעל המסך.";
+            state.micActive = false;
+            updateMicBannerStatus();
+            if (bannerIcon) bannerIcon.textContent = "❌";
+            if (bannerText) bannerText.textContent = "גישת המיקרופון נדחתה. לא נוכל להאזין לפסנתר. נגנו באמצעות המקלדת שעל המסך.";
         });
 }
 
+function restartMicrophone() {
+    console.log("Restarting microphone stream and analyzer...");
+    if (state.microphoneStream) {
+        state.microphoneStream.getTracks().forEach(track => track.stop());
+    }
+    if (state.pitchInterval) {
+        clearInterval(state.pitchInterval);
+        state.pitchInterval = null;
+    }
+    state.micActive = false;
+    state.microphoneStream = null;
+    state.analyser = null;
+    
+    // Call initMicrophone with force=true to request a fresh stream
+    initMicrophone(true);
+}
+
+function updateMicBannerStatus() {
+    const banner = document.getElementById('mic-banner');
+    const bannerIcon = document.getElementById('mic-banner-icon');
+    const bannerText = document.getElementById('mic-banner-text');
+    if (!banner || !bannerIcon || !bannerText) return;
+
+    if (state.micActive) {
+        banner.classList.add('active');
+        if (state.audioContext && state.audioContext.state === 'suspended') {
+            bannerIcon.textContent = "🟡";
+            bannerText.textContent = "המיקרופון מאושר אך בהשהיה. לחצו כאן או בכל מקום במסך כדי להפעיל.";
+            banner.style.background = "rgba(255, 165, 0, 0.15)";
+            banner.style.borderColor = "rgba(255, 165, 0, 0.4)";
+        } else {
+            bannerIcon.textContent = "🟢";
+            bannerText.textContent = "מיקרופון פעיל! נגנו בפסנתר האמיתי שלכם והאפליקציה תאזין.";
+            banner.style.background = "";
+            banner.style.borderColor = "";
+        }
+    } else {
+        banner.classList.remove('active');
+        bannerIcon.textContent = "🎤";
+        bannerText.textContent = "המיקרופון כבוי. לחצו כאן כדי להפעיל זיהוי קולי לפסנתר האמיתי שלכם.";
+        banner.style.background = "";
+        banner.style.borderColor = "";
+    }
+}
+
+// Global user interaction gesture listener to automatically resume suspended AudioContext
+const resumeAudioContextGesture = () => {
+    if (state.audioContext && state.audioContext.state === 'suspended' && state.micActive) {
+        state.audioContext.resume().then(() => {
+            console.log("AudioContext successfully resumed via user gesture.");
+            updateMicBannerStatus();
+            startPitchDetection();
+        });
+    }
+};
+document.addEventListener('click', resumeAudioContextGesture);
+document.addEventListener('keydown', resumeAudioContextGesture);
+
 function startPitchDetection() {
+    if (state.audioContext && state.audioContext.state === 'suspended') {
+        state.audioContext.resume().then(() => {
+            updateMicBannerStatus();
+        });
+    }
+    
+    updateMicBannerStatus();
+    
     if (state.pitchInterval) clearInterval(state.pitchInterval);
+    if (!state.analyser) return;
     
     const bufferLength = state.analyser.fftSize;
     const dataArray = new Float32Array(bufferLength);
@@ -1186,9 +1277,12 @@ function startPitchDetection() {
     const REQUIRED_STABILITY = 3; // Must be identical for 3 consecutive frames (approx 150ms) to trigger note
 
     state.pitchInterval = setInterval(() => {
+        if (!state.analyser || (state.audioContext && state.audioContext.state === 'suspended')) {
+            return;
+        }
         state.analyser.getFloatTimeDomainData(dataArray);
         
-        // Compute frequency using AMDF-autocorrelation
+        // Compute frequency using standard autocorrelation
         const frequency = autoCorrelateFrequency(dataArray, state.audioContext.sampleRate);
         
         if (frequency !== -1) {
@@ -1223,7 +1317,7 @@ function stopPitchDetection() {
     }
 }
 
-// --- AMDF Difference Autocorrelation Pitch Detection Algorithm ---
+// --- Standard Autocorrelation Pitch Detection Algorithm ---
 function autoCorrelateFrequency(buf, sampleRate) {
     const SIZE = buf.length;
     let rms = 0;
@@ -1236,46 +1330,77 @@ function autoCorrelateFrequency(buf, sampleRate) {
     rms = Math.sqrt(rms / SIZE);
 
     // Only process signals above threshold (filters quiet room noise)
-    if (rms < 0.02) {
+    if (rms < 0.012) { 
         return -1; 
     }
 
-    // Average Magnitude Difference Function (AMDF)
     const MAX_SAMPLES = Math.floor(SIZE / 2);
-    let bestOffset = -1;
-    let bestCorrelation = 0;
-    let foundGoodCorrelation = false;
-    const correlations = new Array(MAX_SAMPLES);
+    const correlations = new Array(MAX_SAMPLES).fill(0);
 
-    let lastCorrelation = 1;
+    // Calculate ACF(0) (signal energy in the window)
+    let energy = 0;
+    for (let i = 0; i < MAX_SAMPLES; i++) {
+        energy += buf[i] * buf[i];
+    }
+
+    if (energy < 0.0001) {
+        return -1;
+    }
+
+    // Compute autocorrelation for each offset
     for (let offset = 0; offset < MAX_SAMPLES; offset++) {
-        let correlation = 0;
-
+        let sum = 0;
         for (let i = 0; i < MAX_SAMPLES; i++) {
-            correlation += Math.abs(buf[i] - buf[i + offset]);
+            sum += buf[i] * buf[i + offset];
         }
-        correlation = 1 - (correlation / MAX_SAMPLES);
-        correlations[offset] = correlation;
+        correlations[offset] = sum / energy;
+    }
 
-        // Peak selection threshold
-        if (correlation > 0.88 && correlation > lastCorrelation) {
-            foundGoodCorrelation = true;
-            if (correlation > bestCorrelation) {
-                bestCorrelation = correlation;
-                bestOffset = offset;
+    // Find peaks (local maxima) that are above threshold
+    // Start searching from offset = 20 to avoid the central peak at offset = 0
+    const peaks = [];
+    const threshold = 0.45; // Autocorrelation threshold for pitched sounds
+
+    for (let i = 20; i < MAX_SAMPLES - 1; i++) {
+        if (correlations[i] > correlations[i - 1] && correlations[i] > correlations[i + 1]) {
+            if (correlations[i] > threshold) {
+                peaks.push({ offset: i, val: correlations[i] });
             }
-        } else if (foundGoodCorrelation) {
-            // Parabolic interpolation for sub-sample accuracy
-            const shift = (correlations[bestOffset + 1] - correlations[bestOffset - 1]) / correlations[bestOffset];  
-            return sampleRate / (bestOffset + (8 * shift));
         }
-        lastCorrelation = correlation;
     }
 
-    if (bestCorrelation > 0.05 && bestOffset !== -1) {
-        return sampleRate / bestOffset;
+    if (peaks.length === 0) {
+        return -1;
     }
-    return -1;
+
+    // Sort peaks by correlation value descending to find the strongest match
+    peaks.sort((a, b) => b.val - a.val);
+
+    // To handle octave/harmonic errors, look for the largest offset (fundamental period)
+    // that has a correlation value within 85% of the absolute best peak.
+    const bestVal = peaks[0].val;
+    const candidates = peaks.filter(p => p.val >= bestVal * 0.85);
+    
+    // Sort candidates by offset descending (largest offset = lowest frequency / fundamental)
+    candidates.sort((a, b) => b.offset - a.offset);
+
+    const bestPeak = candidates[0];
+    const bestOffset = bestPeak.offset;
+
+    // Parabolic interpolation for sub-sample accuracy
+    let shift = 0;
+    if (bestOffset > 0 && bestOffset < MAX_SAMPLES - 1) {
+        const alpha = correlations[bestOffset - 1];
+        const beta = correlations[bestOffset];
+        const gamma = correlations[bestOffset + 1];
+        const denom = alpha - 2 * beta + gamma;
+        if (Math.abs(denom) > 0.0001) {
+            shift = 0.5 * (alpha - gamma) / denom;
+        }
+    }
+
+    const preciseOffset = bestOffset + shift;
+    return sampleRate / preciseOffset;
 }
 
 // Map frequency (Hz) to note database
