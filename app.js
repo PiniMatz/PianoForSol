@@ -18,7 +18,8 @@ const state = {
     audioContext: null,
     analyser: null,
     microphoneStream: null,
-    pitchInterval: null
+    pitchInterval: null,
+    transitioning: false
 };
 
 // --- Hebrew Notes Database ---
@@ -62,7 +63,7 @@ const LESSONS_DB = [
         description: 'התו הבסיסי והחשוב ביותר בפסנתר',
         steps: [
             {
-                text: 'ברוכים הבאים! נתחיל מהתו <strong>דו אמצעי</strong>. הוא נמצא מתחת לחמישה, ויושב על קו עזר קטן משלו. נגנו אותו בפסנתר שלכם!',
+                text: 'ברוכים הבאים! נתחיל מהתו <strong>דו אמצעי</strong>. הוא נמצא מתחת לחמשה, ויושב על קו עזר קטן משלו. נגנו אותו בפסנתר שלכם!',
                 targetNote: 'C4',
                 highlightKeys: ['C4']
             },
@@ -84,12 +85,12 @@ const LESSONS_DB = [
         description: 'נלמד את שלושת התווים הראשונים בסולם',
         steps: [
             {
-                text: 'התו השני הוא <strong>רה</strong> (D4). הוא יושב ממש מתחת לקו הראשון של החמישה. נגנו אותו!',
+                text: 'התו השני הוא <strong>רה</strong> (D4). הוא יושב ממש מתחת לקו הראשון של החמשה. נגנו אותו!',
                 targetNote: 'D4',
                 highlightKeys: ['D4']
             },
             {
-                text: 'התו השלישי הוא <strong>מי</strong> (E4). הוא יושב בדיוק על הקו הראשון (התחתון) של החמישה. נגנו אותו!',
+                text: 'התו השלישי הוא <strong>מי</strong> (E4). הוא יושב בדיוק על הקו הראשון (התחתון) של החמשה. נגנו אותו!',
                 targetNote: 'E4',
                 highlightKeys: ['E4']
             },
@@ -118,7 +119,7 @@ const LESSONS_DB = [
     {
         id: 'lesson-3',
         title: 'שיעור 3: התווים שעל הקווים (מי, סול, סי)',
-        description: 'נכיר את התווים המונחים על קווי החמישה',
+        description: 'נכיר את התווים המונחים על קווי החמשה',
         steps: [
             {
                 text: 'כבר למדנו שהקו הראשון הוא התו <strong>מי</strong>. נגנו אותו לחימום!',
@@ -131,7 +132,7 @@ const LESSONS_DB = [
                 highlightKeys: ['G4']
             },
             {
-                text: 'הקו השלישי (האמצעי בחמישה) הוא התו <strong>סי</strong> (B4). נגנו אותו.',
+                text: 'הקו השלישי (האמצעי בחמשה) הוא התו <strong>סי</strong> (B4). נגנו אותו.',
                 targetNote: 'B4',
                 highlightKeys: ['B4']
             },
@@ -909,6 +910,36 @@ function runSongStep() {
     setupInputMode('keyboard');
 }
 
+// --- Loading & Driving Sandbox Mode (מצב האזנה חופשית) ---
+function startSandboxMode() {
+    state.activeSession = {
+        type: 'sandbox',
+        currentNote: null
+    };
+
+    switchTab('play-area');
+    document.getElementById('play-area-title').textContent = 'האזנה חופשית 🎹 (אימון חופשי)';
+    
+    // Clear instruction-box buttons
+    const extraButtons = document.getElementById('instruction-box').querySelectorAll('button');
+    extraButtons.forEach(btn => btn.remove());
+    
+    // Set up keyboard input layout
+    setupInputMode('keyboard');
+
+    document.getElementById('instruction-text').innerHTML = 'נגנו קלידים בפסנתר שלכם או על המסך! האפליקציה תזהה את התו ותציג אותו מיד על החמשה ועל המקלדת.';
+    
+    const feedbackBox = document.getElementById('feedback-text');
+    feedbackBox.textContent = '';
+    feedbackBox.className = 'feedback-text';
+
+    document.getElementById('play-progress-label').textContent = 'מצב חופשי';
+    document.getElementById('play-progress-bar').style.width = '0%';
+
+    drawStaff(null);
+    highlightPianoKeysHelper([]);
+}
+
 // --- Loading & Driving Note Quest (מצב תרגול מהיר) ---
 function startPracticeMode() {
     const practiceType = document.querySelector('input[name="practice-type"]:checked').value; // 'keyboard' or 'quiz'
@@ -1004,7 +1035,7 @@ function runPracticeStep() {
         document.getElementById('instruction-text').innerHTML = `שאלה ${session.stepIndex + 1} מתוך 10:<br>בחרי את השם הנכון של התו המצויר!`;
         generateQuizOptions(randomNote);
     } else {
-        document.getElementById('instruction-text').innerHTML = `שאלה ${session.stepIndex + 1} מתוך 10:<br>מהו התו המצויר על החמישה? נגני אותו!`;
+        document.getElementById('instruction-text').innerHTML = `שאלה ${session.stepIndex + 1} מתוך 10:<br>מהו התו המצויר על החמשה? נגני אותו!`;
         highlightPianoKeysHelper([]);
     }
 
@@ -1017,19 +1048,48 @@ function runPracticeStep() {
 // --- Verification & Playing Input Cues ---
 function handlePlayInput(notePlayed) {
     const session = state.activeSession;
-    if (!session || !session.currentNote) return;
+    if (!session) return;
+
+    if (session.type === 'sandbox') {
+        const playedNoteObj = NOTES_DB.find(n => n.name === notePlayed);
+        if (playedNoteObj) {
+            playNoteSound(playedNoteObj.freq);
+            
+            // Highlight key
+            const key = document.querySelector(`.piano-key[data-note="${notePlayed}"]`);
+            if (key) {
+                key.classList.add('success-active');
+                setTimeout(() => key.classList.remove('success-active'), 500);
+            }
+            
+            // Draw on staff
+            drawStaff(notePlayed);
+            
+            // Highlight keyboard helper
+            highlightPianoKeysHelper([notePlayed]);
+            
+            // Show played note
+            const feedbackBox = document.getElementById('feedback-text');
+            feedbackBox.textContent = `ניגנתם את התו: ${playedNoteObj.hebrew} (${playedNoteObj.name})`;
+            feedbackBox.className = 'feedback-text success';
+        }
+        return;
+    }
+
+    if (!session.currentNote) return;
 
     // Trigger visual note press feedback on Virtual Keyboard
     const key = document.querySelector(`.piano-key[data-note="${notePlayed}"]`);
     
-    const targetNoteObj = NOTES_DB.find(n => n.name === session.currentNote);
-    const playedNoteObj = NOTES_DB.find(n => n.name === notePlayed);
-    
     const isExactMatch = (notePlayed === session.currentNote);
-    const isNoteNameMatch = targetNoteObj && playedNoteObj && (targetNoteObj.hebrew === playedNoteObj.hebrew);
     
-    if (isExactMatch || isNoteNameMatch) {
+    if (isExactMatch) {
         // CORRECT PLAY!
+        state.transitioning = true; // Suspend microphone listening during delay
+        
+        // Clear highlights helper during success transition
+        highlightPianoKeysHelper([]);
+        
         playNoteSound(NOTES_DB.find(n => n.name === notePlayed).freq);
         
         if (key) {
@@ -1041,8 +1101,9 @@ function handlePlayInput(notePlayed) {
         feedbackBox.textContent = getRandomEncouragement();
         feedbackBox.className = 'feedback-text success';
 
-        // Brief delay before moving forward to allow success audio/visual to play
+        // 3-second delay to let the sound settle and prevent accidental double triggers
         setTimeout(() => {
+            state.transitioning = false; // Resume microphone listening
             if (session.type === 'lesson') {
                 session.stepIndex++;
                 runLessonStep();
@@ -1054,7 +1115,7 @@ function handlePlayInput(notePlayed) {
                 session.stepIndex++;
                 runPracticeStep();
             }
-        }, 900);
+        }, 3000);
         
     } else {
         // INCORRECT PLAY!
@@ -1074,7 +1135,9 @@ function handlePlayInput(notePlayed) {
         } else if (session.type === 'practice') {
             // In practice, failure immediately advances to next note to keep flow
             playFailBuzzer();
+            state.transitioning = true;
             setTimeout(() => {
+                state.transitioning = false;
                 session.stepIndex++;
                 runPracticeStep();
             }, 900);
@@ -1274,10 +1337,11 @@ function startPitchDetection() {
     
     let lastNote = null;
     let stableCount = 0;
-    const REQUIRED_STABILITY = 3; // Must be identical for 3 consecutive frames (approx 150ms) to trigger note
+    const REQUIRED_STABILITY = 5; // Must be identical for 5 consecutive frames (approx 250ms) to trigger note to filter transient talks/noise
 
     state.pitchInterval = setInterval(() => {
-        if (!state.analyser || (state.audioContext && state.audioContext.state === 'suspended')) {
+        // Stop analyzing during step transition delay or if Context is suspended
+        if (state.transitioning || !state.analyser || (state.audioContext && state.audioContext.state === 'suspended')) {
             return;
         }
         state.analyser.getFloatTimeDomainData(dataArray);
@@ -1301,16 +1365,16 @@ function startPitchDetection() {
                 matchedNote = noteYin;
             } else {
                 // If they don't agree, check if one has overwhelmingly higher confidence
-                if (yinResult.confidence > 0.88 && acfResult.confidence < 0.6) {
+                if (yinResult.confidence > 0.92 && acfResult.confidence < 0.5) {
                     matchedNote = noteYin;
-                } else if (acfResult.confidence > 0.88 && yinResult.confidence < 0.7) {
+                } else if (acfResult.confidence > 0.92 && yinResult.confidence < 0.6) {
                     matchedNote = noteAcf;
                 }
             }
-        } else if (noteYin && yinResult.confidence > 0.90) {
+        } else if (noteYin && yinResult.confidence > 0.94) {
             // Fallback to YIN if very confident
             matchedNote = noteYin;
-        } else if (noteAcf && acfResult.confidence > 0.88) {
+        } else if (noteAcf && acfResult.confidence > 0.92) {
             // Fallback to ACF if very confident
             matchedNote = noteAcf;
         }
@@ -1353,7 +1417,7 @@ function autoCorrelateFrequency(buf, sampleRate) {
     rms = Math.sqrt(rms / SIZE);
 
     // Only process signals above threshold (filters quiet room noise)
-    if (rms < 0.012) { 
+    if (rms < 0.018) { 
         return { freq: -1, confidence: 0 }; 
     }
 
@@ -1439,7 +1503,7 @@ function autoCorrelateYIN(buf, sampleRate) {
     rms = Math.sqrt(rms / SIZE);
 
     // Only process signals above threshold (filters quiet room noise)
-    if (rms < 0.012) { 
+    if (rms < 0.018) { 
         return { freq: -1, confidence: 0 }; 
     }
 
@@ -1749,14 +1813,14 @@ function shuffleArray(array) {
 
 function getNoteLocationDescription(noteObj) {
     switch(noteObj.name) {
-        case 'C4': return 'התו דו אמצעי (Middle C) נמצא מתחת לחמישה, ויושב על קו עזר קטן משלו.';
-        case 'D4': return 'התו רה ממוקם ממש מתחת לקו הראשון (התחתון) של החמישה, בלי לחצות אותו.';
-        case 'E4': return 'התו מי יושב בדיוק על הקו הראשון (התחתון) של החמישה.';
-        case 'F4': return 'התו פה יושב במרווח הראשון של החמישה (בין הקו הראשון לשני).';
-        case 'G4': return 'התו סול יושב על הקו השני של החמישה. זהו הקו שממנו מתחיל הציור של מפתח סול!';
-        case 'A4': return 'התו לה יושב במרווח השני של החמישה (בין הקו השני לשלישי).';
-        case 'B4': return 'התו סי יושב בדיוק על הקו השלישי (האמצעי) של החמישה.';
-        case 'C5': return 'התו דו גבוה יושב במרווח השלישי של החמישה.';
+        case 'C4': return 'התו דו אמצעי (Middle C) נמצא מתחת לחמשה, ויושב על קו עזר קטן משלו.';
+        case 'D4': return 'התו רה ממוקם ממש מתחת לקו הראשון (התחתון) של החמשה, בלי לחצות אותו.';
+        case 'E4': return 'התו מי יושב בדיוק על הקו הראשון (התחתון) של החמשה.';
+        case 'F4': return 'התו פה יושב במרווח הראשון של החמשה (בין הקו הראשון לשני).';
+        case 'G4': return 'התו סול יושב על הקו השני של החמשה. זהו הקו שממנו מתחיל הציור של מפתח סול!';
+        case 'A4': return 'התו לה יושב במרווח השני של החמשה (בין הקו השני לשלישי).';
+        case 'B4': return 'התו סי יושב בדיוק על הקו השלישי (האמצעי) של החמשה.';
+        case 'C5': return 'התו דו גבוה יושב במרווח השלישי של החמשה.';
         default: return `התו ${noteObj.hebrew} ממוקם בגובה של ${noteObj.name}.`;
     }
 }
