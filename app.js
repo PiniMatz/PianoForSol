@@ -1282,26 +1282,49 @@ function startPitchDetection() {
         }
         state.analyser.getFloatTimeDomainData(dataArray);
         
-        // Compute frequency using standard autocorrelation
-        const frequency = autoCorrelateFrequency(dataArray, state.audioContext.sampleRate);
+        // 1. Run ACF (Autocorrelation)
+        const acfResult = autoCorrelateFrequency(dataArray, state.audioContext.sampleRate);
         
-        if (frequency !== -1) {
-            // Find closest note
-            const matchedNote = findClosestNote(frequency);
-            if (matchedNote) {
-                if (matchedNote.name === lastNote) {
-                    stableCount++;
-                    if (stableCount === REQUIRED_STABILITY) {
-                        handlePlayInput(matchedNote.name);
-                        stableCount = 0; // Reset after trigger to avoid double hits
-                    }
-                } else {
-                    lastNote = matchedNote.name;
-                    stableCount = 1;
+        // 2. Run YIN
+        const yinResult = autoCorrelateYIN(dataArray, state.audioContext.sampleRate);
+        
+        // Find closest notes
+        const noteAcf = acfResult.freq !== -1 ? findClosestNote(acfResult.freq) : null;
+        const noteYin = yinResult.freq !== -1 ? findClosestNote(yinResult.freq) : null;
+        
+        let matchedNote = null;
+        
+        if (noteAcf && noteYin) {
+            // Check if they agree on the Hebrew note name (pitch class)
+            if (noteAcf.hebrew === noteYin.hebrew) {
+                // If they agree, they consensus-verify each other
+                matchedNote = noteYin;
+            } else {
+                // If they don't agree, check if one has overwhelmingly higher confidence
+                if (yinResult.confidence > 0.88 && acfResult.confidence < 0.6) {
+                    matchedNote = noteYin;
+                } else if (acfResult.confidence > 0.88 && yinResult.confidence < 0.7) {
+                    matchedNote = noteAcf;
+                }
+            }
+        } else if (noteYin && yinResult.confidence > 0.90) {
+            // Fallback to YIN if very confident
+            matchedNote = noteYin;
+        } else if (noteAcf && acfResult.confidence > 0.88) {
+            // Fallback to ACF if very confident
+            matchedNote = noteAcf;
+        }
+        
+        if (matchedNote) {
+            if (matchedNote.name === lastNote) {
+                stableCount++;
+                if (stableCount === REQUIRED_STABILITY) {
+                    handlePlayInput(matchedNote.name);
+                    stableCount = 0; // Reset after trigger to avoid double hits
                 }
             } else {
-                lastNote = null;
-                stableCount = 0;
+                lastNote = matchedNote.name;
+                stableCount = 1;
             }
         } else {
             lastNote = null;
@@ -1331,7 +1354,7 @@ function autoCorrelateFrequency(buf, sampleRate) {
 
     // Only process signals above threshold (filters quiet room noise)
     if (rms < 0.012) { 
-        return -1; 
+        return { freq: -1, confidence: 0 }; 
     }
 
     const MAX_SAMPLES = Math.floor(SIZE / 2);
@@ -1344,7 +1367,7 @@ function autoCorrelateFrequency(buf, sampleRate) {
     }
 
     if (energy < 0.0001) {
-        return -1;
+        return { freq: -1, confidence: 0 };
     }
 
     // Compute autocorrelation for each offset
@@ -1370,7 +1393,7 @@ function autoCorrelateFrequency(buf, sampleRate) {
     }
 
     if (peaks.length === 0) {
-        return -1;
+        return { freq: -1, confidence: 0 };
     }
 
     // Sort peaks by correlation value descending to find the strongest match
@@ -1400,7 +1423,96 @@ function autoCorrelateFrequency(buf, sampleRate) {
     }
 
     const preciseOffset = bestOffset + shift;
-    return sampleRate / preciseOffset;
+    return { freq: sampleRate / preciseOffset, confidence: bestPeak.val };
+}
+
+// --- YIN Pitch Detection Algorithm ---
+function autoCorrelateYIN(buf, sampleRate) {
+    const SIZE = buf.length;
+    let rms = 0;
+
+    // Calculate Root Mean Square (RMS) volume
+    for (let i = 0; i < SIZE; i++) {
+        const val = buf[i];
+        rms += val * val;
+    }
+    rms = Math.sqrt(rms / SIZE);
+
+    // Only process signals above threshold (filters quiet room noise)
+    if (rms < 0.012) { 
+        return { freq: -1, confidence: 0 }; 
+    }
+
+    const MAX_SAMPLES = Math.floor(SIZE / 2);
+    
+    // Step 1: Difference function
+    const d = new Float32Array(MAX_SAMPLES);
+    for (let tau = 0; tau < MAX_SAMPLES; tau++) {
+        let sum = 0;
+        for (let i = 0; i < MAX_SAMPLES; i++) {
+            const delta = buf[i] - buf[i + tau];
+            sum += delta * delta;
+        }
+        d[tau] = sum;
+    }
+    
+    // Step 2: Cumulative mean normalized difference function
+    const dPrime = new Float32Array(MAX_SAMPLES);
+    dPrime[0] = 1;
+    let runningSum = 0;
+    for (let tau = 1; tau < MAX_SAMPLES; tau++) {
+        runningSum += d[tau];
+        dPrime[tau] = d[tau] / (runningSum / tau);
+    }
+    
+    // Step 3: Absolute thresholding
+    const threshold = 0.15; // Standard YIN threshold
+    let tauChoice = -1;
+    
+    // Find the first local minimum below threshold
+    for (let tau = 20; tau < MAX_SAMPLES - 1; tau++) {
+        if (dPrime[tau] < threshold) {
+            // Find local minimum
+            if (dPrime[tau] < dPrime[tau - 1] && dPrime[tau] < dPrime[tau + 1]) {
+                tauChoice = tau;
+                break;
+            }
+        }
+    }
+    
+    // Fallback: if no minimum is below threshold, choose the absolute minimum
+    if (tauChoice === -1) {
+        let minVal = 1.0;
+        for (let tau = 20; tau < MAX_SAMPLES; tau++) {
+            if (dPrime[tau] < minVal) {
+                minVal = dPrime[tau];
+                tauChoice = tau;
+            }
+        }
+        // If the absolute minimum is too high, it's unpitched
+        if (minVal > 0.35) {
+            return { freq: -1, confidence: 0 };
+        }
+    }
+    
+    // Step 4: Parabolic interpolation
+    let shift = 0;
+    const bestOffset = tauChoice;
+    if (bestOffset > 0 && bestOffset < MAX_SAMPLES - 1) {
+        const alpha = dPrime[bestOffset - 1];
+        const beta = dPrime[bestOffset];
+        const gamma = dPrime[bestOffset + 1];
+        const denom = alpha - 2 * beta + gamma;
+        if (Math.abs(denom) > 0.0001) {
+            shift = 0.5 * (alpha - gamma) / denom;
+        }
+    }
+    
+    const preciseOffset = bestOffset + shift;
+    const freq = sampleRate / preciseOffset;
+    const confidence = 1 - dPrime[bestOffset]; // 1 - dPrime is our confidence measure (higher is better)
+    
+    return { freq, confidence };
 }
 
 // Map frequency (Hz) to note database
